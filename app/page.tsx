@@ -54,36 +54,36 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+    <div className="min-h-screen bg-[#FAF9F6] transition-all duration-500">
       <Header currentPage="home" title="汉字繁简学习" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 搜索区域 */}
         <div className="mb-8">
           <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9A9A9A]" />
             <input
               type="text"
               placeholder="搜索汉字（支持多个字符）..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+              className="w-full pl-12 pr-4 py-4 text-lg border border-[#E8E2D5] rounded-xl focus:ring-2 focus:ring-[#DC143C] focus:border-transparent bg-white text-[#1A1A1A] placeholder-[#9A9A9A] shadow-subtle focus:shadow-soft transition-all duration-250"
             />
           </div>
           
           {/* 搜索结果 */}
           {searchResults.length > 0 && (
             <div className="mt-4 max-w-2xl mx-auto">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 transition-colors">找到 {searchResults.length} 个汉字</p>
+              <p className="text-sm text-[#5A5A5A] mb-3">找到 {searchResults.length} 个汉字</p>
               <div className="flex flex-wrap gap-2">
                 {searchResults.map(hanzi => (
                   <button
                     key={hanzi.index}
                     onClick={() => handleHanziClick(hanzi)}
-                    className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-600 transition-colors"
+                    className="px-3 py-2 bg-white border border-[#E8E2D5] rounded-lg hover:border-[#DC143C] hover:bg-[#FFF5F5] transition-all duration-250 shadow-subtle"
                   >
-                    <span className="text-lg font-bold text-red-600 dark:text-red-500">{safeValue(hanzi.char)}</span>
-                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">{safeValue(hanzi.pinyin)}</span>
+                    <span className="text-lg font-bold text-[#DC143C]">{safeValue(hanzi.char)}</span>
+                    <span className="ml-2 text-sm text-[#5A5A5A]">{safeValue(hanzi.pinyin)}</span>
                   </button>
                 ))}
               </div>
@@ -93,25 +93,25 @@ export default function Home() {
 
         {/* 热门汉字 */}
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">热门汉字</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-[#1A1A1A]">热门汉字</h2>
             <button
               onClick={() => {
                 const randomPopular = [...hanziData].sort(() => 0.5 - Math.random()).slice(0, 10)
                 setPopularHanzi(randomPopular)
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E2D5] rounded-lg hover:bg-[#F5F2ED] transition-all duration-250 shadow-subtle"
             >
-              <Shuffle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <Shuffle className="h-4 w-4 text-[#5A5A5A]" />
               换一批
             </button>
           </div>
           <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
             {popularHanzi.map(hanzi => (
-              <div key={hanzi.index} className="p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-600 transition-all hover:scale-105 cursor-pointer"
+              <div key={hanzi.index} className="p-4 bg-white border border-[#E8E2D5] rounded-lg hover:border-[#DC143C] hover:bg-[#FFF5F5] transition-all duration-250 cursor-pointer shadow-subtle hover:shadow-soft"
                    onClick={() => handleHanziClick(hanzi)}>
-                <div className="text-2xl font-bold text-red-600 dark:text-red-500 text-center">{safeValue(hanzi.char)}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">{safeValue(hanzi.pinyin)}</div>
+                <div className="text-2xl font-bold text-[#DC143C] text-center">{safeValue(hanzi.char)}</div>
+                <div className="text-xs text-[#5A5A5A] text-center mt-1">{safeValue(hanzi.pinyin)}</div>
               </div>
             ))}
           </div>
@@ -119,9 +119,9 @@ export default function Home() {
 
         {/* 选中汉字详情 */}
         {selectedHanzi.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors">
+          <div className="bg-white border border-[#E8E2D5] rounded-xl shadow-soft p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">汉字详情</h2>
+              <h2 className="text-xl font-semibold text-[#1A1A1A]">汉字详情</h2>
               <DisplayModeToggle displayMode={displayMode} onModeChange={setDisplayMode} />
             </div>
 

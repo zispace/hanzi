@@ -79,22 +79,22 @@ export default function ListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+    <div className="min-h-screen bg-[#FAF9F6] transition-all duration-500">
       <Header currentPage="list" title="汉字列表" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 搜索和筛选区域 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors">
+        <div className="bg-white border border-[#E8E2D5] rounded-xl shadow-soft p-6 mb-6">
           <div className="flex flex-col lg:flex-row gap-4 mb-6">
             {/* 搜索框 */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9A9A9A]" />
               <input
                 type="text"
                 placeholder="搜索汉字、拼音..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                className="w-full pl-12 pr-4 py-3 border border-[#E8E2D5] rounded-lg focus:ring-2 focus:ring-[#DC143C] focus:border-transparent bg-white text-[#1A1A1A] placeholder-[#9A9A9A] transition-all duration-250"
               />
             </div>
             
@@ -107,7 +107,7 @@ export default function ListPage() {
                   setSelectedFilter('all')
                   setCurrentPage(1)
                 }}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                className="px-4 py-3 border border-[#E8E2D5] rounded-lg focus:ring-2 focus:ring-[#DC143C] focus:border-transparent bg-white text-[#1A1A1A] transition-all duration-250"
               >
                 <option value="level">按级别</option>
                 <option value="group">按分组</option>
@@ -119,7 +119,7 @@ export default function ListPage() {
                   setSelectedFilter(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent min-w-[120px]"
+                className="px-4 py-3 border border-[#E8E2D5] rounded-lg focus:ring-2 focus:ring-[#DC143C] focus:border-transparent bg-white text-[#1A1A1A] min-w-[120px] transition-all duration-250"
               >
                 <option value="all">全部</option>
                 {filterOptions.map(option => (
@@ -133,7 +133,7 @@ export default function ListPage() {
                   setItemsPerPage(Number(e.target.value))
                   setCurrentPage(1)
                 }}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                className="px-4 py-3 border border-[#E8E2D5] rounded-lg focus:ring-2 focus:ring-[#DC143C] focus:border-transparent bg-white text-[#1A1A1A] transition-all duration-250"
               >
                 <option value={10}>10条/页</option>
                 <option value={20}>20条/页</option>
@@ -145,7 +145,7 @@ export default function ListPage() {
 
           {/* 显示模式切换 */}
           <div className="flex items-center justify-between">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-[#5A5A5A]">
               共找到 {filteredData.length} 个汉字，当前显示第 {currentPage} 页
             </p>
             <DisplayModeToggle displayMode={displayMode} onModeChange={setDisplayMode} />
@@ -172,7 +172,7 @@ export default function ListPage() {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E2D5] rounded-lg hover:bg-[#F5F2ED] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
             >
               <ChevronLeft className="h-4 w-4" />
               上一页
@@ -195,10 +195,10 @@ export default function ListPage() {
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    className={`w-10 h-10 rounded-lg transition-colors ${
+                    className={`w-10 h-10 rounded-lg transition-all duration-250 ${
                       currentPage === pageNum
-                        ? 'bg-red-600 text-white'
-                        : 'bg-white border border-gray-300 hover:bg-gray-50'
+                        ? 'bg-[#DC143C] text-white shadow-subtle'
+                        : 'bg-white border border-[#E8E2D5] text-[#5A5A5A] hover:bg-[#F5F2ED]'
                     }`}
                   >
                     {pageNum}
@@ -210,7 +210,7 @@ export default function ListPage() {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E2D5] rounded-lg hover:bg-[#F5F2ED] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
             >
               下一页
               <ChevronRight className="h-4 w-4" />

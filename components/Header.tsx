@@ -1,6 +1,7 @@
 'use client'
 
 import { BookOpen } from 'lucide-react'
+import { colors, typography, spacing, utils } from '@/lib/design-system'
 
 interface HeaderProps {
   currentPage: 'home' | 'list' | 'learn'
@@ -9,28 +10,33 @@ interface HeaderProps {
 
 export default function Header({ currentPage, title }: HeaderProps) {
   const getNavClass = (page: 'home' | 'list' | 'learn') => {
-    const baseClass = "px-4 py-2 transition-colors"
+    const baseClass = "px-4 py-2 transition-all duration-250 rounded-md"
     if (page === currentPage) {
-      return `${baseClass} text-red-600 dark:text-red-500 font-semibold`
+      return `${baseClass} bg-[#DC143C] text-white font-medium`
     }
-    return `${baseClass} text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500`
+    return `${baseClass} text-[#5A5A5A] hover:text-[#1A1A1A] hover:bg-[#F5F2ED]`
   }
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors">
+    <header className="bg-[#FAF9F6] border-b border-[#E8E2D5] shadow-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <BookOpen className="h-8 w-8 text-red-600 dark:text-red-500" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors">{title}</h1>
+            <div className="p-2 bg-[#DC143C] rounded-lg">
+              <BookOpen className="h-6 w-6 text-white" />
+            </div>
+            <h1 
+              className="text-3xl font-bold text-[#1A1A1A]"
+              style={{ fontFamily: typography.fontFamily.serif.join(', ') }}
+            >
+              {title}
+            </h1>
           </div>
-          <div className="flex items-center gap-4">
-            <nav className="flex gap-4">
-              <a href="/" className={getNavClass('home')}>首页</a>
-              <a href="/learn" className={getNavClass('learn')}>学习</a>
-              <a href="/list" className={getNavClass('list')}>列表</a>
-            </nav>
-          </div>
+          <nav className="flex gap-2 bg-[#F5F2ED] p-1 rounded-lg">
+            <a href="/" className={getNavClass('home')}>首页</a>
+            <a href="/learn" className={getNavClass('learn')}>学习</a>
+            <a href="/list" className={getNavClass('list')}>列表</a>
+          </nav>
         </div>
       </div>
     </header>

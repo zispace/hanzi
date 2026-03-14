@@ -2,6 +2,7 @@
 
 import { Volume2 } from 'lucide-react'
 import { HanziItem, getLevelColor, safeValue, speakText } from '@/lib/types'
+import { colors, typography, utils } from '@/lib/design-system'
 
 interface HanziCardProps {
   hanzi: HanziItem
@@ -23,8 +24,8 @@ export default function HanziCard({
   onClick
 }: HanziCardProps) {
   const cardClass = compact 
-    ? "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-600 transition-all hover:scale-105 p-3"
-    : "bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 relative group"
+    ? "bg-[#FAF9F6] border border-[#E8E2D5] rounded-lg hover:border-[#DC143C] hover:shadow-soft transition-all duration-250 p-3 cursor-pointer"
+    : "bg-[#FAF9F6] border border-[#E8E2D5] rounded-lg shadow-subtle hover:shadow-soft transition-all duration-250 p-6 relative group cursor-pointer"
 
   const charSize = compact ? "text-2xl" : "text-4xl"
   const formSize = compact ? "text-sm" : "text-lg"
@@ -32,8 +33,8 @@ export default function HanziCard({
   return (
     <div className={cardClass} onClick={onClick}>
       {!compact && showLevel && (
-        <div className="absolute top-2 right-2">
-          <span className={`inline-block px-2 py-1 text-xs rounded-full ${getLevelColor(hanzi.level)}`}>
+        <div className="absolute top-3 right-3">
+          <span className="inline-block px-2 py-1 text-xs rounded-full bg-[#F5F2ED] text-[#5A5A5A] border border-[#E8E2D5]">
             {safeValue(hanzi.level)}
           </span>
         </div>
@@ -44,38 +45,39 @@ export default function HanziCard({
           e.stopPropagation()
           speakText(safeValue(hanzi.char))
         }}
-        className={compact 
-          ? "absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-white dark:bg-gray-600 rounded-full shadow-md"
-          : "absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-white dark:bg-gray-600 rounded-full shadow-md"
-        }
+        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-250 p-2 bg-white rounded-full shadow-subtle hover:shadow-soft"
       >
-        <Volume2 className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+        <Volume2 className="h-4 w-4 text-[#5A5A5A]" />
       </button>
       
       <div className="text-center">
-        <div className={`${charSize} font-bold text-red-600 dark:text-red-500 mb-3`}>
+        <div 
+          className={`${charSize} font-bold text-[#DC143C] mb-3`}
+          style={{ fontFamily: typography.fontFamily.serif.join(', ') }}
+        >
           {safeValue(hanzi.char)}
         </div>
         
         {showBothForms && (
-          <div className={`grid grid-cols-2 gap-2 mb-3 ${formSize} font-serif`}>
+          <div className={`grid grid-cols-2 gap-2 mb-3 ${formSize}`} 
+               style={{ fontFamily: typography.fontFamily.serif.join(', ') }}>
             <div className="text-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">繁体</div>
-              <div className="text-gray-800 dark:text-gray-200">{safeValue(hanzi.fanti)}</div>
+              <div className="text-xs text-[#9A9A9A] mb-1">繁体</div>
+              <div className="text-[#1A1A1A]">{safeValue(hanzi.fanti)}</div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">简体</div>
-              <div className="text-gray-800 dark:text-gray-200">{safeValue(hanzi.jianti)}</div>
+              <div className="text-xs text-[#9A9A9A] mb-1">简体</div>
+              <div className="text-[#1A1A1A]">{safeValue(hanzi.jianti)}</div>
             </div>
           </div>
         )}
         
         {showPinyin && (
-          <div className="text-blue-600 dark:text-blue-400 mb-2">{safeValue(hanzi.pinyin)}</div>
+          <div className="text-[#3A3A3A] mb-2 text-sm">{safeValue(hanzi.pinyin)}</div>
         )}
         
         {showGroup && (
-          <div className="text-xs text-gray-400 dark:text-gray-500">{safeValue(hanzi.group)}</div>
+          <div className="text-xs text-[#9A9A9A]">{safeValue(hanzi.group)}</div>
         )}
       </div>
     </div>

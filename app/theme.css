@@ -1,0 +1,148 @@
+/* CSS Variables for Humanistic Chinese Theme */
+/* Simple, elegant, and maintainable design system */
+
+:root {
+  /* Core Colors - 60-30-10 Rule */
+  --bg-primary: #FAF9F6;      /* 60% - Paper-like background */
+  --bg-secondary: #F5F2ED;    /* Card and hover states */
+  --bg-white: #FFFFFF;         /* Pure white */
+  
+  --text-primary: #1A1A1A;    /* 30% - Main text */
+  --text-secondary: #5A5A5A;  /* Secondary text */
+  --text-muted: #3A3A3A;      /* Muted text (pinyin) */
+  
+  --accent-primary: #DC143C;   /* 10% - Traditional Chinese red */
+  --accent-secondary: #B91C1C; /* Hover accent */
+  
+  --border-primary: #E8E2D5;  /* Soft borders */
+  --border-secondary: #DFD6C4; /* Hover borders */
+}
+
+/* Base styles */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Heiti SC',  'SimHei', 'Microsoft YaHei',  sans-serif;
+}
+
+/* Essential utility classes */
+.bg-primary { background-color: var(--bg-primary); }
+.bg-secondary { background-color: var(--bg-secondary); }
+.bg-white { background-color: var(--bg-white); }
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+
+.border-primary { border-color: var(--border-primary); }
+.border-secondary { border-color: var(--border-secondary); }
+
+/* Component styles */
+.card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(26, 26, 26, 0.12);
+  transition: all 250ms ease-in-out;
+}
+
+.card:hover {
+  border-color: var(--border-secondary);
+  box-shadow: 0 4px 6px rgba(26, 26, 26, 0.07);
+}
+
+.button-primary {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 250ms ease-in-out;
+  box-shadow: 0 1px 3px rgba(26, 26, 26, 0.12);
+}
+
+.button-primary:hover {
+  background: var(--accent-secondary);
+}
+
+.button-secondary {
+  background: var(--bg-white);
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 250ms ease-in-out;
+}
+
+.button-secondary:hover {
+  background: var(--bg-secondary);
+}
+
+.input {
+  background: var(--bg-white);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  transition: all 250ms ease-in-out;
+}
+
+.input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--accent-primary);
+  outline: none;
+}
+
+/* Focus and hover states */
+.focus-accent:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--accent-primary);
+  outline: none;
+}
+
+.hover-accent:hover {
+  border-color: var(--accent-primary);
+}
+
+.hover-bg:hover {
+  background: var(--bg-secondary);
+}
+
+/* Hanzi-specific styles */
+.hanzi {
+  font-weight: 700;
+}
+
+.hanzi-primary {
+  color: var(--accent-primary);
+}
+
+.hanzi-secondary {
+  color: var(--text-primary);
+}
+
+.hanzi-muted {
+  color: var(--text-muted);
+}
+
+/* Navigation */
+.nav-item {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 250ms ease-in-out;
+}
+
+.nav-active {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.nav-inactive {
+  color: var(--text-secondary);
+}
+
+.nav-inactive:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}

@@ -37,7 +37,7 @@ export default function HanziGrid({
     <div className={`grid ${gridColsClass[columns as keyof typeof gridColsClass] || gridColsClass[4]} gap-6`}>
       {data.map((hanzi) => (
         <HanziCard
-          key={hanzi.index}
+          key={`${hanzi.index}-${hanzi.char}`}
           hanzi={hanzi}
           compact={compact}
           showLevel={showLevel}

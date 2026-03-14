@@ -1,18 +1,11 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { BookOpen, Volume2, Eye, EyeOff, Shuffle, CheckCircle, XCircle, Moon, Sun } from 'lucide-react'
-
-interface HanziItem {
-  index: number
-  char: string
-  fanti: string
-  jianti: string
-  group: string
-  level: string
-  ids: string
-  pinyin: string
-}
+import { useState, useEffect } from 'react'
+import { BookOpen, Eye, EyeOff, Shuffle, CheckCircle, XCircle } from 'lucide-react'
+import { HanziItem, safeValue, speakText } from '@/lib/types'
+import Header from '@/components/Header'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import HanziNineGrid from '@/components/HanziNineGrid'
 
 export default function LearnPage() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
@@ -36,9 +29,6 @@ export default function LearnPage() {
       })
   }, [])
 
-  const safeValue = (value: any) => {
-    return value || ''
-  }
 
   const generateNewHanzi = (data: HanziItem[]) => {
     const randomHanzi = [...data].sort(() => 0.5 - Math.random()).slice(0, 9)
@@ -68,45 +58,14 @@ export default function LearnPage() {
     }, 2000)
   }
 
-  const speakText = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = 'zh-CN'
-      utterance.rate = 0.8
-      speechSynthesis.speak(utterance)
-    }
-  }
 
   if (!hanziData.length) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400 transition-colors">加载数据中...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <BookOpen className="h-8 w-8 text-red-600 dark:text-red-500" />
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors">汉字学习</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <nav className="flex gap-4">
-                <a href="/" className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors">首页</a>
-                <a href="/learn" className="px-4 py-2 text-red-600 dark:text-red-500 font-semibold transition-colors">学习</a>
-                <a href="/list" className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors">列表</a>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header currentPage="learn" title="汉字学习" />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 控制区域 */}
@@ -152,36 +111,11 @@ export default function LearnPage() {
           </div>
           
           {/* 九宫格汉字显示 */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {currentHanzi.map((hanzi, index) => (
-              <div key={hanzi.index} className="relative group">
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg p-8 flex items-center justify-center">
-                  <div className="text-center">
-                    {/* 主要汉字显示 */}
-                    <div className="text-6xl font-serif text-gray-800 mb-2" style={{ fontFamily: 'KaiTi, STKaiti, serif' }}>
-                      {showMode === 'fanti' ? safeValue(hanzi.jianti) : safeValue(hanzi.fanti)}
-                    </div>
-                    
-                    {/* 拼音 */}
-                    <div className="text-sm text-blue-600 mb-2">{safeValue(hanzi.pinyin)}</div>
-                    
-                    {/* 语音按钮 */}
-                    <button
-                      onClick={() => speakText(safeValue(hanzi.char))}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-white rounded-full shadow-md mx-auto"
-                    >
-                      <Volume2 className="h-4 w-4 text-gray-600" />
-                    </button>
-                  </div>
-                </div>
-                
-                {/* 序号 */}
-                <div className="absolute -top-2 -left-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                  {index + 1}
-                </div>
-              </div>
-            ))}
-          </div>
+          <HanziNineGrid 
+            data={currentHanzi} 
+            showMode={showMode}
+            onSpeak={speakText}
+          />
 
           {/* 答案区域 */}
           <div className="space-y-4">

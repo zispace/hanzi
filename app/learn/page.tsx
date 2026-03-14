@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { BookOpen, Eye, EyeOff, Shuffle, CheckCircle, XCircle } from 'lucide-react'
 import { HanziItem, safeValue, speakText } from '@/lib/types'
 import Header from '@/components/Header'
@@ -16,6 +16,7 @@ export default function LearnPage() {
   const [score, setScore] = useState({ correct: 0, total: 0 })
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
+  const [selectedGroup, setSelectedGroup] = useState<string>('all')
 
   useEffect(() => {
     fetch('/data.json')
@@ -29,6 +30,21 @@ export default function LearnPage() {
       })
   }, [])
 
+
+  const groupOptions = useMemo(() => {
+    if (!hanziData.length) return ['all']
+    const groups = new Set<string>()
+    hanziData.forEach(item => {
+      const group = safeValue(item.group)
+      if (group) groups.add(group)
+    })
+    return ['all', ...Array.from(groups).sort()]
+  }, [hanziData])
+
+  const filteredData = useMemo(() => {
+    if (selectedGroup === 'all') return hanziData
+    return hanziData.filter(item => safeValue(item.group) === selectedGroup)
+  }, [hanziData, selectedGroup])
 
   const generateNewHanzi = (data: HanziItem[]) => {
     const randomHanzi = [...data].sort(() => 0.5 - Math.random()).slice(0, 9)
@@ -73,8 +89,14 @@ export default function LearnPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-lg font-semibold mb-2">
-                {showMode === 'fanti' ? '繁体字练习' : '简体字练习'}
+                {showMode === 'fanti' ? '简体字练习（学习繁体）' : '繁体字练习（学习简体）'}
               </h2>
+              <div className="text-sm text-muted">
+                {showMode === 'fanti' 
+                  ? '显示简体字，请输入对应的繁体字' 
+                  : '显示繁体字，请输入对应的简体字'
+                }
+              </div>
               <div className="text-sm ">
                 得分: <span className="font-bold ">{score.correct}</span> / {score.total}
               </div>
@@ -82,32 +104,51 @@ export default function LearnPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setShowMode('fanti')}
-                className={`px-4 py-2 rounded-lg transition-all duration-250 ${
+                className={`px-4 py-2 rounded-lg transition-all duration-300 transform ${
                   showMode === 'fanti' 
-                    ? '  shadow-subtle' 
-                    : 'bg-white border hover:'
+                    ? 'button-primary scale-105 shadow-subtle' 
+                    : 'button-secondary hover:scale-105'
                 }`}
               >
-                练习繁体
+                显示简体
               </button>
               <button
                 onClick={() => setShowMode('jianti')}
-                className={`px-4 py-2 rounded-lg transition-all duration-250 ${
+                className={`px-4 py-2 rounded-lg transition-all duration-300 transform ${
                   showMode === 'jianti' 
-                    ? '  shadow-subtle' 
-                    : 'bg-white border hover:'
+                    ? 'button-primary scale-105 shadow-subtle' 
+                    : 'button-secondary hover:scale-105'
                 }`}
               >
-                练习简体
+                显示繁体
               </button>
               <button
-                onClick={() => generateNewHanzi(hanziData)}
-                className="flex items-center gap-2 px-4 py-2  rounded-lg hover: transition-all duration-250 shadow-subtle"
+                onClick={() => generateNewHanzi(filteredData)}
+                className="flex items-center gap-2 px-4 py-2 button-secondary hover:scale-105 transition-all duration-300 transform"
               >
                 <Shuffle className="h-4 w-4" />
                 换一批
               </button>
             </div>
+          </div>
+          
+          {/* 分组选择器 */}
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-medium">选择分组：</label>
+            <select
+              value={selectedGroup}
+              onChange={(e) => {
+                setSelectedGroup(e.target.value)
+                generateNewHanzi(filteredData)
+              }}
+              className="px-4 py-2 input border rounded-lg focus-accent"
+            >
+              {groupOptions.map(group => (
+                <option key={group} value={group}>
+                  {group === 'all' ? '全部' : group}
+                </option>
+              ))}
+            </select>
           </div>
           
           {/* 九宫格汉字显示 */}

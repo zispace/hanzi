@@ -17,13 +17,13 @@ export default function HanziNineGrid({ data, showMode, onSpeak }: HanziNineGrid
           <div className="bg-gradient-to-br to-secondary border-2 rounded-xl p-8 flex items-center justify-center card">
             <div className="text-center">
               <div 
-                className="text-6xl hanzi hanzi-primary mb-3"
+                className="text-6xl hanzi hanzi-primary mb-3 calligraphy-grid rounded-lg p-4"
                 style={{ 
                   fontFamily: 'var(--font-kai)',
                   fontWeight: '500'
                 }}
               >
-                {showMode === 'fanti' ? safeValue(hanzi.jianti) : safeValue(hanzi.fanti)}
+                {showMode === 'fanti' ? safeValue(hanzi.char) : safeValue(hanzi.fanti)}
               </div>
               
               <div className="text-sm hanzi-muted mb-3">{safeValue(hanzi.pinyin)}</div>

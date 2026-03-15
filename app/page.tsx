@@ -17,12 +17,15 @@ export default function Home() {
   const [popularHanzi, setPopularHanzi] = useState<HanziItem[]>([])
 
   useEffect(() => {
-    fetch('/data.json')
-      .then(response => response.json())
-      .then(data => {
-        setHanziData(data)
+    Promise.all([
+      fetch('/data/data1.json').then(response => response.json()),
+      fetch('/data/data2.json').then(response => response.json())
+    ])
+      .then(([data1, data2]) => {
+        const combinedData = [...data1, ...data2]
+        setHanziData(combinedData)
         // 随机选择10个热门汉字
-        const randomPopular = [...data].sort(() => 0.5 - Math.random()).slice(0, 10)
+        const randomPopular = [...combinedData].sort(() => 0.5 - Math.random()).slice(0, 10)
         setPopularHanzi(randomPopular)
       })
       .catch(error => {
@@ -37,8 +40,8 @@ export default function Home() {
     const matchedItems = hanziData.filter((item: HanziItem) => {
       return searchChars.some(char => 
         safeValue(item.char).includes(char) ||
-        safeValue(item.fanti).includes(char) ||
-        safeValue(item.jianti).includes(char)
+        safeValue(item.trad).includes(char) ||
+        safeValue(item.simp).includes(char)
       )
     })
     
@@ -55,7 +58,7 @@ export default function Home() {
   }, [hanziData, searchTerm])
 
   const handleHanziClick = (hanzi: HanziItem) => {
-    if (!selectedHanzi.find(h => h.index === hanzi.index)) {
+    if (!selectedHanzi.find(h => h.char === hanzi.char)) {
       setSelectedHanzi([...selectedHanzi, hanzi])
     }
   }
@@ -72,7 +75,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 搜索区域 */}
         <div className="mb-8">
-          <div className="relative max-w-2xl mx-auto">
+          <div className="relative max-w-2xl mx-auto mb-4">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary pointer-events-none z-10" />
             <input
               type="text"
@@ -121,7 +124,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
             {popularHanzi.map(hanzi => (
-              <div key={hanzi.index} className="p-4 card hover-accent cursor-pointer"
+              <div key={hanzi.char} className="p-4 card hover-accent cursor-pointer"
                    onClick={() => handleHanziClick(hanzi)}>
                 <div className="text-2xl hanzi hanzi-primary text-center">{safeValue(hanzi.char)}</div>
                 <div className="text-xs text-muted text-center mt-1">{safeValue(hanzi.pinyin)}</div>
@@ -144,7 +147,7 @@ export default function Home() {
                 columns={4}
                 onCardClick={(hanzi) => {
                   // Remove from selection when clicked in details
-                  setSelectedHanzi(prev => prev.filter(h => h.index !== hanzi.index))
+                  setSelectedHanzi(prev => prev.filter(h => h.char !== hanzi.char))
                 }}
               />
             ) : (

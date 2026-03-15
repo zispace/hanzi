@@ -2,27 +2,32 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
-import { HanziItem, safeValue } from '@/lib/types'
+import { HanziItem, safeValue, tagMapping } from '@/lib/types'
 import Header from '@/components/Header'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import HanziGrid from '@/components/HanziGrid'
 import HanziTable from '@/components/HanziTable'
 import DisplayModeToggle from '@/components/DisplayModeToggle'
+import MultiSelectDropdown from '@/components/MultiSelectDropdown'
 
 export default function ListPage() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
-  const [filterType, setFilterType] = useState<'level' | 'group'>('level')
+  const [filterType, setFilterType] = useState<'tags' | 'group'>('group')
   const [selectedFilter, setSelectedFilter] = useState('all')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
 
   useEffect(() => {
-    fetch('/data.json')
-      .then(response => response.json())
-      .then(data => {
-        setHanziData(data)
+    Promise.all([
+      fetch('/data/data1.json').then(response => response.json()),
+      fetch('/data/data2.json').then(response => response.json())
+    ])
+      .then(([data1, data2]) => {
+        const combinedData = [...data1, ...data2]
+        setHanziData(combinedData)
       })
       .catch(error => {
         console.error('Error loading data:', error)
@@ -33,18 +38,16 @@ export default function ListPage() {
   const filterOptions = useMemo(() => {
     if (!hanziData.length) return []
     
-    const options = new Set<string>()
-    hanziData.forEach(item => {
-      if (filterType === 'level') {
-        const level = safeValue(item.level)
-        if (level) options.add(level)
-      } else {
+    if (filterType === 'group') {
+      const groups = new Set<string>()
+      hanziData.forEach(item => {
         const group = safeValue(item.group)
-        if (group) options.add(group)
-      }
-    })
-    
-    return Array.from(options).sort()
+        if (group) groups.add(group)
+      })
+      return Array.from(groups).sort()
+    } else {
+      return Object.keys(tagMapping)
+    }
   }, [hanziData, filterType])
 
   const filteredData = useMemo(() => {
@@ -53,16 +56,22 @@ export default function ListPage() {
     return hanziData.filter((item: HanziItem) => {
       const matchesSearch = searchTerm === '' || 
         safeValue(item.char).includes(searchTerm) ||
-        safeValue(item.fanti).includes(searchTerm) ||
-        safeValue(item.jianti).includes(searchTerm) ||
+        safeValue(item.trad).includes(searchTerm) ||
+        safeValue(item.simp).includes(searchTerm) ||
         safeValue(item.pinyin).includes(searchTerm)
       
-      const matchesFilter = selectedFilter === 'all' || 
-        (filterType === 'level' ? item.level === selectedFilter : item.group === selectedFilter)
+      let matchesFilter = true
+      if (filterType === 'group') {
+        matchesFilter = selectedFilter === 'all' || safeValue(item.group) === selectedFilter
+      } else if (filterType === 'tags') {
+        matchesFilter = selectedTags.length === 0 || selectedTags.some(tag => 
+          item.tags.includes(tag)
+        )
+      }
       
       return matchesSearch && matchesFilter
     })
-  }, [hanziData, searchTerm, selectedFilter, filterType])
+  }, [hanziData, searchTerm, selectedFilter, selectedTags, filterType])
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -106,29 +115,43 @@ export default function ListPage() {
               <select
                 value={filterType}
                 onChange={(e) => {
-                  setFilterType(e.target.value as 'level' | 'group')
+                  setFilterType(e.target.value as 'tags' | 'group')
                   setSelectedFilter('all')
+                  setSelectedTags([])
                   setCurrentPage(1)
                 }}
                 className="px-4 py-3 input border rounded-lg focus-accent"
               >
-                <option value="level">按级别</option>
                 <option value="group">按分组</option>
+                <option value="tags">按标签</option>
               </select>
               
-              <select
-                value={selectedFilter}
-                onChange={(e) => {
-                  setSelectedFilter(e.target.value)
-                  setCurrentPage(1)
-                }}
-                className="px-4 py-3 input border rounded-lg focus-accent min-w-[120px]"
-              >
-                <option value="all">全部</option>
-                {filterOptions.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
+              {filterType === 'group' ? (
+                <select
+                  value={selectedFilter}
+                  onChange={(e) => {
+                    setSelectedFilter(e.target.value)
+                    setCurrentPage(1)
+                  }}
+                  className="px-4 py-3 input border rounded-lg focus-accent min-w-[120px]"
+                >
+                  <option value="all">全部</option>
+                  {filterOptions.map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="min-w-[320px]">
+                  <MultiSelectDropdown
+                    selectedTags={selectedTags}
+                    onTagsChange={(tags) => {
+                      setSelectedTags(tags)
+                      setCurrentPage(1)
+                    }}
+                    placeholder="选择标签..."
+                  />
+                </div>
+              )}
               
               <select
                 value={itemsPerPage}
@@ -160,18 +183,25 @@ export default function ListPage() {
           <HanziGrid 
             data={paginatedData} 
             columns={5}
-            showLevel={true}
+            showTags={true}
+            showStrokeCount={true}
+            showRadical={true}
             showGroup={true}
             showPinyin={true}
             showBothForms={true}
           />
         ) : (
-          <HanziTable data={paginatedData} />
+          <HanziTable 
+            data={paginatedData} 
+            showTags={true}
+            showStrokeCount={true}
+            showRadical={true}
+          />
         )}
 
         {/* 分页控件 */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 mt-8">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}

@@ -7,6 +7,11 @@ import Header from '@/components/Header'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import HanziNineGrid from '@/components/HanziNineGrid'
 
+function getChar(hanzi: HanziItem, showMode: 'fanti' | 'jianti') {
+  const targetField = showMode === 'fanti' ? hanzi.trad : hanzi.simp;
+  return targetField || hanzi.char;
+}
+
 export default function LearnPage() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [currentHanzi, setCurrentHanzi] = useState<HanziItem[]>([])
@@ -15,15 +20,17 @@ export default function LearnPage() {
   const [showMode, setShowMode] = useState<'fanti' | 'jianti'>('fanti')
   const [score, setScore] = useState({ correct: 0, total: 0 })
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
   const [selectedGroup, setSelectedGroup] = useState<string>('all')
 
   useEffect(() => {
-    fetch('/data.json')
-      .then(response => response.json())
-      .then(data => {
-        setHanziData(data)
-        generateNewHanzi(data)
+    Promise.all([
+      fetch('/data/data1.json').then(response => response.json()),
+      fetch('/data/data2.json').then(response => response.json())
+    ])
+      .then(([data1, data2]) => {
+        const combinedData = [...data1, ...data2]
+        setHanziData(combinedData)
+        generateNewHanzi(combinedData)
       })
       .catch(error => {
         console.error('Error loading data:', error)
@@ -58,7 +65,7 @@ export default function LearnPage() {
     if (!currentHanzi.length) return
     
     const userChars = userInput.trim().split('')
-    const targetChars = currentHanzi.map(h => showMode === 'fanti' ? h.fanti : h.jianti)
+    const targetChars = currentHanzi.map(h => getChar(h, showMode))
     
     const isCorrect = userChars.length === targetChars.length && 
       userChars.every((char, index) => char === targetChars[index])
@@ -159,7 +166,7 @@ export default function LearnPage() {
           />
 
           {/* 答案区域 */}
-          <div className="space-y-4">
+          <div className="space-y-4 mt-8">
             <div className="flex items-center gap-4">
               <label className=" font-medium">输入答案：</label>
               <input
@@ -209,7 +216,7 @@ export default function LearnPage() {
                   style={{ fontFamily: 'var(--font-serif)' }}
                 >
                   {currentHanzi.map((hanzi, index) => (
-                    <span key={index}>{showMode === 'fanti' ? safeValue(hanzi.fanti) : safeValue(hanzi.jianti)}</span>
+                    <span key={index}>{safeValue(getChar(hanzi, showMode))}</span>
                   ))}
                 </div>
               </div>
@@ -221,10 +228,10 @@ export default function LearnPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-semibold  mb-2">学习提示</h3>
           <ul className="text-sm  space-y-1">
-            <li>• 观察九宫格中的汉字，输入对应的{showMode === 'fanti' ? '繁体' : '简体'}字</li>
-            <li>• 点击"显示答案"可以查看正确答案</li>
-            <li>• 点击语音按钮可以听到标准发音</li>
-            <li>• 点击"换一批"可以练习新的汉字</li>
+            <li>观察九宫格中的汉字，输入对应的{showMode === 'fanti' ? '繁体' : '简体'}字</li>
+            <li>点击"显示答案"可以查看正确答案</li>
+            <li>点击语音按钮可以听到标准发音</li>
+            <li>点击"换一批"可以练习新的汉字</li>
           </ul>
         </div>
       </main>

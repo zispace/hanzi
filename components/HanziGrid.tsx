@@ -7,6 +7,9 @@ interface HanziGridProps {
   data: HanziItem[]
   columns?: number
   compact?: boolean
+  showTags?: boolean
+  showStrokeCount?: boolean
+  showRadical?: boolean
   showLevel?: boolean
   showGroup?: boolean
   showPinyin?: boolean
@@ -18,7 +21,10 @@ export default function HanziGrid({
   data,
   columns = 4,
   compact = false,
-  showLevel = true,
+  showTags = true,
+  showStrokeCount = true,
+  showRadical = true,
+  showLevel = false,
   showGroup = true,
   showPinyin = true,
   showBothForms = true,
@@ -37,9 +43,12 @@ export default function HanziGrid({
     <div className={`grid ${gridColsClass[columns as keyof typeof gridColsClass] || gridColsClass[4]} gap-6`}>
       {data.map((hanzi) => (
         <HanziCard
-          key={`${hanzi.index}-${hanzi.char}`}
+          key={hanzi.char}
           hanzi={hanzi}
           compact={compact}
+          showTags={showTags}
+          showStrokeCount={showStrokeCount}
+          showRadical={showRadical}
           showLevel={showLevel}
           showGroup={showGroup}
           showPinyin={showPinyin}

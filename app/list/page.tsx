@@ -1,85 +1,69 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
-import { HanziItem, safeValue, tagMapping } from '@/lib/types'
-import Header from '@/components/Header'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import DisplayModeToggle from '@/components/DisplayModeToggle'
 import HanziGrid from '@/components/HanziGrid'
 import HanziTable from '@/components/HanziTable'
-import DisplayModeToggle from '@/components/DisplayModeToggle'
+import Header from '@/components/Header'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown'
+import { loadHanziData } from '@/lib/dataLoader'
+import { HanziItem, tagMapping } from '@/lib/types'
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { PAGINATION, UI_LABELS } from './constants'
+import { calculatePaginatedData, extractUniqueGroups, generatePageNumbers, groupFilter, searchFilter, tagsFilter } from './utils'
 
 export default function ListPage() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
-  const [filterType, setFilterType] = useState<'tags' | 'group'>('group')
-  const [selectedFilter, setSelectedFilter] = useState('all')
+  const [filterMode, setFilterMode] = useState<'tags' | 'group'>('group')
+  const [selectedGroup, setSelectedGroup] = useState('all')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
 
   useEffect(() => {
-    Promise.all([
-      fetch('/data/data1.json').then(response => response.json()),
-      fetch('/data/data2.json').then(response => response.json())
-    ])
-      .then(([data1, data2]) => {
-        const combinedData = [...data1, ...data2]
-        setHanziData(combinedData)
-      })
+    loadHanziData().then(data => {
+      setHanziData(data)
+    })
       .catch(error => {
         console.error('Error loading data:', error)
       })
   }, [])
 
-
   const filterOptions = useMemo(() => {
     if (!hanziData.length) return []
-    
-    if (filterType === 'group') {
-      const groups = new Set<string>()
-      hanziData.forEach(item => {
-        const group = safeValue(item.group)
-        if (group) groups.add(group)
-      })
-      return Array.from(groups).sort()
+    if (filterMode === 'group') {
+      return extractUniqueGroups(hanziData)
     } else {
       return Object.keys(tagMapping)
     }
-  }, [hanziData, filterType])
+  }, [hanziData, filterMode])
 
   const filteredData = useMemo(() => {
     if (!hanziData.length) return []
-    
-    return hanziData.filter((item: HanziItem) => {
-      const matchesSearch = searchTerm === '' || 
-        safeValue(item.char).includes(searchTerm) ||
-        safeValue(item.trad).includes(searchTerm) ||
-        safeValue(item.simp).includes(searchTerm) ||
-        safeValue(item.pinyin).includes(searchTerm)
-      
+
+    const result = hanziData.filter((item: HanziItem) => {
+      const matchesSearch = searchFilter(item, searchQuery)
+
       let matchesFilter = true
-      if (filterType === 'group') {
-        matchesFilter = selectedFilter === 'all' || safeValue(item.group) === selectedFilter
-      } else if (filterType === 'tags') {
-        matchesFilter = selectedTags.length === 0 || selectedTags.some(tag => 
-          item.tags.includes(tag)
-        )
+      if (filterMode === 'group') {
+        matchesFilter = groupFilter(item, selectedGroup)
+      } else if (filterMode === 'tags') {
+        matchesFilter = tagsFilter(item, selectedTags)
       }
-      
+
       return matchesSearch && matchesFilter
     })
-  }, [hanziData, searchTerm, selectedFilter, selectedTags, filterType])
+    return result
+  }, [hanziData, searchQuery, selectedGroup, selectedTags, filterMode])
 
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    return filteredData.slice(startIndex, startIndex + itemsPerPage)
+    return calculatePaginatedData(filteredData, currentPage, itemsPerPage)
   }, [filteredData, currentPage, itemsPerPage])
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
-
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -103,39 +87,39 @@ export default function ListPage() {
               <input
                 type="text"
                 placeholder="搜索汉字、拼音..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 pl-12 pr-4 py-3 input border rounded-lg focus-accent"
                 style={{ paddingLeft: '3rem' }}
               />
             </div>
-            
+
             {/* 筛选选项 */}
             <div className="flex gap-2">
               <select
-                value={filterType}
+                value={filterMode}
                 onChange={(e) => {
-                  setFilterType(e.target.value as 'tags' | 'group')
-                  setSelectedFilter('all')
+                  setFilterMode(e.target.value as 'tags' | 'group')
+                  setSelectedGroup('all')
                   setSelectedTags([])
                   setCurrentPage(1)
                 }}
                 className="px-4 py-3 input border rounded-lg focus-accent"
               >
-                <option value="group">按分组</option>
-                <option value="tags">按标签</option>
+                <option value="group">{UI_LABELS.FILTER_GROUP}</option>
+                <option value="tags">{UI_LABELS.FILTER_TAGS}</option>
               </select>
-              
-              {filterType === 'group' ? (
+
+              {filterMode === 'group' ? (
                 <select
-                  value={selectedFilter}
+                  value={selectedGroup}
                   onChange={(e) => {
-                    setSelectedFilter(e.target.value)
+                    setSelectedGroup(e.target.value)
                     setCurrentPage(1)
                   }}
                   className="px-4 py-3 input border rounded-lg focus-accent min-w-[120px]"
                 >
-                  <option value="all">全部</option>
+                  <option value="all">{UI_LABELS.CLEAR_ALL}</option>
                   {filterOptions.map(option => (
                     <option key={option} value={option}>{option}</option>
                   ))}
@@ -148,11 +132,11 @@ export default function ListPage() {
                       setSelectedTags(tags)
                       setCurrentPage(1)
                     }}
-                    placeholder="选择标签..."
+                    placeholder={UI_LABELS.TAGS_PLACEHOLDER}
                   />
                 </div>
               )}
-              
+
               <select
                 value={itemsPerPage}
                 onChange={(e) => {
@@ -161,10 +145,9 @@ export default function ListPage() {
                 }}
                 className="px-4 py-3 input border rounded-lg focus-accent"
               >
-                <option value={10}>10条/页</option>
-                <option value={20}>20条/页</option>
-                <option value={50}>50条/页</option>
-                <option value={100}>100条/页</option>
+                {UI_LABELS.ITEMS_PER_PAGE.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -172,16 +155,16 @@ export default function ListPage() {
           {/* 显示模式切换 */}
           <div className="flex items-center justify-between">
             <p className="">
-              共找到 {filteredData.length} 个汉字，当前显示第 {currentPage} 页
+              {UI_LABELS.RESULTS_TEXT.replace('{count}', filteredData.length.toString()).replace('{page}', currentPage.toString())}
             </p>
-            <DisplayModeToggle displayMode={displayMode} onModeChange={setDisplayMode} />
+            <DisplayModeToggle displayMode={displayMode} onModeChange={(mode) => setDisplayMode(mode as 'grid' | 'table')} />
           </div>
         </div>
 
         {/* 数据展示区域 */}
         {displayMode === 'grid' ? (
-          <HanziGrid 
-            data={paginatedData} 
+          <HanziGrid
+            data={paginatedData}
             columns={5}
             showTags={true}
             showStrokeCount={true}
@@ -191,8 +174,8 @@ export default function ListPage() {
             showBothForms={true}
           />
         ) : (
-          <HanziTable 
-            data={paginatedData} 
+          <HanziTable
+            data={paginatedData}
             showTags={true}
             showStrokeCount={true}
             showRadical={true}
@@ -208,44 +191,30 @@ export default function ListPage() {
               className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover: disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
             >
               <ChevronLeft className="h-4 w-4" />
-              上一页
+              {PAGINATION.PREV_PAGE}
             </button>
-            
+
             <div className="flex gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum
-                if (totalPages <= 5) {
-                  pageNum = i + 1
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i
-                } else {
-                  pageNum = currentPage - 2 + i
-                }
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`w-10 h-10 rounded-lg transition-all duration-250 ${
-                      currentPage === pageNum
-                        ? '  shadow-subtle'
-                        : 'bg-white border  hover:'
+              {generatePageNumbers(currentPage, totalPages).map((pageNum, index) => (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-10 h-10 rounded-lg transition-all duration-250 ${currentPage === pageNum
+                    ? ' shadow-subtle'
+                    : 'bg-white border  hover:'
                     }`}
-                  >
-                    {pageNum}
-                  </button>
-                )
-              })}
+                >
+                  {pageNum}
+                </button>
+              ))}
             </div>
-            
+
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover: disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
             >
-              下一页
+              {PAGINATION.NEXT_PAGE}
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>

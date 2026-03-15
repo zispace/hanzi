@@ -1,7 +1,7 @@
 'use client'
 
-import { Filter } from 'lucide-react'
 import { tagMapping } from '@/lib/types'
+import { Filter } from 'lucide-react'
 
 interface TagFilterProps {
   selectedTags: string[]

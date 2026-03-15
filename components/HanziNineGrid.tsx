@@ -1,14 +1,11 @@
 'use client'
 
-import { Volume2 } from 'lucide-react'
-import { HanziItem, safeValue, speakText } from '@/lib/types'
+import { HanziItem, safeValue, speakText } from '@/lib/types';
+import { Volume2 } from 'lucide-react';
 
 function getChar(hanzi: HanziItem, showMode: 'fanti' | 'jianti') {
-  const targetField = showMode === 'fanti' ? hanzi.trad : hanzi.simp;
-  // 如果目标字段为空，尝试使用另一个字段
-  const fallbackField = showMode === 'fanti' ? hanzi.simp : hanzi.trad;
-  // 最后使用char字段作为默认值
-  return targetField || fallbackField || hanzi.char;
+  const targetField = showMode === 'fanti' ? hanzi.simp : hanzi.trad;
+  return targetField || hanzi.char;
 }
 
 interface HanziNineGridProps {
@@ -24,13 +21,7 @@ export default function HanziNineGrid({ data, showMode, onSpeak }: HanziNineGrid
         <div key={hanzi.char} className="relative group">
           <div className="bg-gradient-to-br to-secondary border-2 rounded-xl p-8 flex items-center justify-center card">
             <div className="text-center">
-              <div 
-                className="text-6xl hanzi hanzi-primary mb-3 calligraphy-grid rounded-lg p-4"
-                style={{ 
-                  fontFamily: 'var(--font-kai)',
-                  fontWeight: '500'
-                }}
-              >
+              <div className="text-6xl hanzi hanzi-primary hanzi-font-kai mb-3 calligraphy-grid rounded-lg p-4">
                 {safeValue(getChar(hanzi, showMode))}
               </div>
               
@@ -48,9 +39,9 @@ export default function HanziNineGrid({ data, showMode, onSpeak }: HanziNineGrid
             </div>
           </div>
           
-          <div className="absolute -top-2 -left-2 w-7 h-7 bg-accent-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+          {/* <div className="absolute -top-2 -left-2 w-7 h-7 bg-accent-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
             {index + 1}
-          </div>
+          </div> */}
         </div>
       ))}
     </div>

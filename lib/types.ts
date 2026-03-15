@@ -47,17 +47,34 @@ export const tagMapping: Record<string, string> = {
   "i3": "地名生僻字/多音字"
 }
 
+
+export const tagShortMapping: Record<string, string> = {
+  "a1": "一级字",
+  "a2": "二级字",
+  "a3": "三级字",
+  "d1": "HZC",
+  "d4": "HSK",
+  "e1": "GB2312",
+  "e2": "GB12345",
+  "e3": "Big5",
+  "e4": "Big5",
+  "f1": "台湾",
+  "f2": "香港",
+  "f3": "香港",
+  "g1": "日本",
+  "g2": "韩国",
+}
+
+// 中文语音
 export const speakText = (text: string) => {
   if ('speechSynthesis' in window) {
-    // 取消当前正在播放的语音
     speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
-
-    // 设置中文语言
     utterance.lang = 'zh-CN';
+    utterance.rate = 0.75;
+    utterance.pitch = 1.1;
+    utterance.volume = 0.8;
 
-    // 尝试获取可用的中文语音
     const voices = speechSynthesis.getVoices();
     const chineseVoice = voices.find(voice =>
       voice.lang.includes('zh') ||
@@ -69,11 +86,6 @@ export const speakText = (text: string) => {
     if (chineseVoice) {
       utterance.voice = chineseVoice;
     }
-
-    // 优化语音参数以获得更自然的声音
-    utterance.rate = 0.75; // 稍微慢一点
-    utterance.pitch = 1.1; // 稍微提高音调
-    utterance.volume = 0.8; // 适当音量
 
     speechSynthesis.speak(utterance);
   }

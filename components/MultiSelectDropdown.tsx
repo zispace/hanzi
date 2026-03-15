@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { ChevronDown } from 'lucide-react'
 import { tagMapping } from '@/lib/types'
+import { ChevronDown } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 interface MultiSelectDropdownProps {
   selectedTags: string[]

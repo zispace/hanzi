@@ -11,10 +11,10 @@ export default function Header({ currentPage, title }: HeaderProps) {
   const getTitle = () => {
     if (title) return title
     switch (currentPage) {
-      case 'home': return '汉字学习'
-      case 'list': return '汉字列表'
-      case 'learn': return '汉字练习'
-      default: return '汉字学习'
+      case 'home': return '汉字认读学习'
+      case 'list': return '汉字列表速览'
+      case 'learn': return '汉字繁简学习'
+      default: return '汉字认读学习'
     }
   }
   const getNavClass = (page: 'home' | 'list' | 'learn') => {
@@ -33,10 +33,7 @@ export default function Header({ currentPage, title }: HeaderProps) {
             <div className="p-2 rounded-lg">
               <BookOpen className="h-6 w-6 " />
             </div>
-            <h1 
-              className="text-3xl font-bold text-primary"
-              style={{ fontFamily: 'var(--font-serif)' }}
-            >
+            <h1 className="text-3xl font-bold text-primary">
               {getTitle()}
             </h1>
           </div>

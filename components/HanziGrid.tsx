@@ -10,7 +10,7 @@ interface HanziGridProps {
   showTags?: boolean
   showStrokeCount?: boolean
   showRadical?: boolean
-  showLevel?: boolean
+  showIDS?: boolean
   showGroup?: boolean
   showPinyin?: boolean
   showBothForms?: boolean
@@ -24,7 +24,7 @@ export default function HanziGrid({
   showTags = true,
   showStrokeCount = true,
   showRadical = true,
-  showLevel = false,
+  showIDS = false,
   showGroup = true,
   showPinyin = true,
   showBothForms = true,
@@ -49,7 +49,7 @@ export default function HanziGrid({
           showTags={showTags}
           showStrokeCount={showStrokeCount}
           showRadical={showRadical}
-          showLevel={showLevel}
+          showIDS={showIDS}
           showGroup={showGroup}
           showPinyin={showPinyin}
           showBothForms={showBothForms}

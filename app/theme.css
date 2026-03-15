@@ -20,7 +20,25 @@
   /* Font Families */
   --font-sans: 'Heiti SC', 'SimHei', 'Microsoft YaHei', sans-serif;
   --font-serif: 'Songti SC', 'SimSun', serif;
-  --font-kai: 'KaiTi', 'STKaiti', serif;
+  --font-kai: 'KaiTi', 'STKaiti', 'Songti SC', 'SimSun', serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1A1A1A;
+    --bg-secondary: #2A2A2A;
+    --bg-white: #333333;
+
+    --text-primary: #F5F5F5;
+    --text-secondary: #CCCCCC;
+    --text-muted: #AAAAAA;
+
+    --accent-primary: #FF6B6B;
+    --accent-secondary: #FF5252;
+
+    --border-primary: #404040;
+    --border-secondary: #555555;
+  }
 }
 
 /* Base styles */
@@ -131,26 +149,18 @@ body {
   color: var(--text-muted);
 }
 
+.hanzi-font-kai {
+  font-family: var(--font-kai);
+  font-weight: 500;
+}
+
 /* Calligraphy Grid Background */
 .calligraphy-grid {
   position: relative;
-  background-image: 
-    /* 十字线 - 细实线 */
-    linear-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.2) 1px, transparent 1px),
-    /* X字线 - 极细虚线 */
-    linear-gradient(45deg, transparent 49.8%, rgba(220, 20, 60, 0.08) 49.9%, transparent 50.1%),
-    linear-gradient(-45deg, transparent 49.8%, rgba(220, 20, 60, 0.08) 49.9%, transparent 50.1%),
-    /* 边框 */
-    linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px),
-    linear-gradient(to left, rgba(0, 0, 0, 0.3) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px),
-    linear-gradient(to top, rgba(0, 0, 0, 0.3) 1px, transparent 1px);
-  background-size: 100px 100px;
   background-position: center center;
   background-repeat: no-repeat;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-  border-radius: 0.5rem;
+  border: 1.5px solid var(--border-secondary);
+  border-radius: 0.25rem;
 }
 
 /* Navigation */

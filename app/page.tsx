@@ -1,33 +1,35 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { Search, Shuffle } from 'lucide-react'
-import { HanziItem, safeValue } from '@/lib/types'
-import Header from '@/components/Header'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import DisplayModeToggle from '@/components/DisplayModeToggle'
 import HanziGrid from '@/components/HanziGrid'
 import HanziTable from '@/components/HanziTable'
-import DisplayModeToggle from '@/components/DisplayModeToggle'
+import Header from '@/components/Header'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { loadHanziData } from '@/lib/dataLoader'
+import { HanziItem, safeValue } from '@/lib/types'
+import { Search, Shuffle } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function Home() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedHanzi, setSelectedHanzi] = useState<HanziItem[]>([])
-  const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
+  const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('table')
   const [popularHanzi, setPopularHanzi] = useState<HanziItem[]>([])
+  const displayCount = 10
+
+  const getRandomPopularHanzi = (data: HanziItem[], count: number) => {
+    const filteredData = data.filter(item => item.group === 'A1a' || item.group === 'A1b')
+    return [...filteredData].sort(() => 0.5 - Math.random()).slice(0, count)
+  }
 
   useEffect(() => {
-    Promise.all([
-      fetch('/data/data1.json').then(response => response.json()),
-      fetch('/data/data2.json').then(response => response.json())
-    ])
-      .then(([data1, data2]) => {
-        const combinedData = [...data1, ...data2]
-        setHanziData(combinedData)
-        // 随机选择10个热门汉字
-        const randomPopular = [...combinedData].sort(() => 0.5 - Math.random()).slice(0, 10)
-        setPopularHanzi(randomPopular)
-      })
+    loadHanziData().then(data => {
+      setHanziData(data)
+      // 随机选择热门汉字
+      const randomPopular = getRandomPopularHanzi(data, displayCount)
+      setPopularHanzi(randomPopular)
+    })
       .catch(error => {
         console.error('Error loading data:', error)
       })
@@ -110,10 +112,10 @@ export default function Home() {
         {/* 热门汉字 */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-primary">热门汉字</h2>
+            <h2 className="text-xl font-semibold text-primary">基础汉字</h2>
             <button
               onClick={() => {
-                const randomPopular = [...hanziData].sort(() => 0.5 - Math.random()).slice(0, 10)
+                const randomPopular = getRandomPopularHanzi(hanziData, displayCount)
                 setPopularHanzi(randomPopular)
               }}
               className="flex items-center gap-2 px-4 py-2 button-secondary"
@@ -124,7 +126,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
             {popularHanzi.map(hanzi => (
-              <div key={hanzi.char} className="p-4 card hover-accent cursor-pointer"
+              <div key={hanzi.char} className="p-4 card hover-accent cursor-pointer hanzi-font-kai"
                    onClick={() => handleHanziClick(hanzi)}>
                 <div className="text-2xl hanzi hanzi-primary text-center">{safeValue(hanzi.char)}</div>
                 <div className="text-xs text-muted text-center mt-1">{safeValue(hanzi.pinyin)}</div>

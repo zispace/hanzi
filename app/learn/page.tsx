@@ -1,62 +1,51 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { BookOpen, Eye, EyeOff, Shuffle, CheckCircle, XCircle } from 'lucide-react'
-import { HanziItem, safeValue, speakText } from '@/lib/types'
+import HanziNineGrid from '@/components/HanziNineGrid'
 import Header from '@/components/Header'
 import LoadingSpinner from '@/components/LoadingSpinner'
-import HanziNineGrid from '@/components/HanziNineGrid'
-
-function getChar(hanzi: HanziItem, showMode: 'fanti' | 'jianti') {
-  const targetField = showMode === 'fanti' ? hanzi.trad : hanzi.simp;
-  return targetField || hanzi.char;
-}
+import { loadHanziData } from '@/lib/dataLoader'
+import { HanziItem, safeValue, speakText } from '@/lib/types'
+import { CheckCircle, Eye, EyeOff, Shuffle, XCircle } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { FEEDBACK_MESSAGES, LEARNING_MODES, UI_TEXTS } from './constants'
+import { extractUniqueGroups, generateRandomHanzi, getCharacterByMode, validateAnswer } from './utils'
 
 export default function LearnPage() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [currentHanzi, setCurrentHanzi] = useState<HanziItem[]>([])
-  const [showFanti, setShowFanti] = useState(false)
+  const [showAnswer, setShowAnswer] = useState(false)
   const [userInput, setUserInput] = useState('')
-  const [showMode, setShowMode] = useState<'fanti' | 'jianti'>('fanti')
+  const [learningMode, setLearningMode] = useState<typeof LEARNING_MODES[keyof typeof LEARNING_MODES]>(LEARNING_MODES.SIMPLIFIED)
   const [score, setScore] = useState({ correct: 0, total: 0 })
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<string>('all')
 
   useEffect(() => {
-    Promise.all([
-      fetch('/data/data1.json').then(response => response.json()),
-      fetch('/data/data2.json').then(response => response.json())
-    ])
-      .then(([data1, data2]) => {
-        const combinedData = [...data1, ...data2]
-        setHanziData(combinedData)
-        generateNewHanzi(combinedData)
-      })
+    loadHanziData().then(rawData => {
+      const data = rawData.filter(item => item.trad || item.simp)
+      setHanziData(data)
+      startNewRound(data)
+    })
       .catch(error => {
         console.error('Error loading data:', error)
       })
   }, [])
 
-
   const groupOptions = useMemo(() => {
     if (!hanziData.length) return ['all']
-    const groups = new Set<string>()
-    hanziData.forEach(item => {
-      const group = safeValue(item.group)
-      if (group) groups.add(group)
-    })
-    return ['all', ...Array.from(groups).sort()]
+    const groups = extractUniqueGroups(hanziData)
+    return ['all', ...groups]
   }, [hanziData])
 
   const filteredData = useMemo(() => {
     if (selectedGroup === 'all') return hanziData
-    return hanziData.filter(item => safeValue(item.group) === selectedGroup)
+    return hanziData.filter(item => item.group === selectedGroup)
   }, [hanziData, selectedGroup])
 
-  const generateNewHanzi = (data: HanziItem[]) => {
-    const randomHanzi = [...data].sort(() => 0.5 - Math.random()).slice(0, 9)
+  const startNewRound = (data: HanziItem[]) => {
+    const randomHanzi = generateRandomHanzi(data)
     setCurrentHanzi(randomHanzi)
-    setShowFanti(false)
+    setShowAnswer(false)
     setUserInput('')
     setFeedback(null)
   }
@@ -64,11 +53,8 @@ export default function LearnPage() {
   const checkAnswer = () => {
     if (!currentHanzi.length) return
     
-    const userChars = userInput.trim().split('')
-    const targetChars = currentHanzi.map(h => getChar(h, showMode))
-    
-    const isCorrect = userChars.length === targetChars.length && 
-      userChars.every((char, index) => char === targetChars[index])
+    const targetChars = currentHanzi.map(h => getCharacterByMode(h, learningMode))
+    const isCorrect = validateAnswer(userInput, targetChars)
     
     setFeedback(isCorrect ? 'correct' : 'incorrect')
     setScore(prev => ({
@@ -92,17 +78,16 @@ export default function LearnPage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 控制区域 */}
-        <div className="bg-white border rounded-xl shadow-soft p-6 mb-8">
+
+        <div className="shadow-soft p-6 mb-8">
+          <div className="card p-6 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-lg font-semibold mb-2">
-                {showMode === 'fanti' ? '简体字练习（学习繁体）' : '繁体字练习（学习简体）'}
+                {UI_TEXTS[learningMode].title}
               </h2>
               <div className="text-sm text-muted">
-                {showMode === 'fanti' 
-                  ? '显示简体字，请输入对应的繁体字' 
-                  : '显示繁体字，请输入对应的简体字'
-                }
+                {UI_TEXTS[learningMode].instruction}
               </div>
               <div className="text-sm ">
                 得分: <span className="font-bold ">{score.correct}</span> / {score.total}
@@ -110,27 +95,27 @@ export default function LearnPage() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => setShowMode('fanti')}
+                onClick={() => setLearningMode(LEARNING_MODES.SIMPLIFIED)}
                 className={`px-4 py-2 rounded-lg transition-all duration-300 transform ${
-                  showMode === 'fanti' 
+                  learningMode === LEARNING_MODES.SIMPLIFIED 
                     ? 'button-primary scale-105 shadow-subtle' 
                     : 'button-secondary hover:scale-105'
                 }`}
               >
-                显示简体
+                {UI_TEXTS[LEARNING_MODES.SIMPLIFIED].button}
               </button>
               <button
-                onClick={() => setShowMode('jianti')}
+                onClick={() => setLearningMode(LEARNING_MODES.TRADITIONAL)}
                 className={`px-4 py-2 rounded-lg transition-all duration-300 transform ${
-                  showMode === 'jianti' 
+                  learningMode === LEARNING_MODES.TRADITIONAL 
                     ? 'button-primary scale-105 shadow-subtle' 
                     : 'button-secondary hover:scale-105'
                 }`}
               >
-                显示繁体
+                {UI_TEXTS[LEARNING_MODES.TRADITIONAL].button}
               </button>
               <button
-                onClick={() => generateNewHanzi(filteredData)}
+                onClick={() => startNewRound(filteredData)}
                 className="flex items-center gap-2 px-4 py-2 button-secondary hover:scale-105 transition-all duration-300 transform"
               >
                 <Shuffle className="h-4 w-4" />
@@ -145,8 +130,10 @@ export default function LearnPage() {
             <select
               value={selectedGroup}
               onChange={(e) => {
-                setSelectedGroup(e.target.value)
-                generateNewHanzi(filteredData)
+                const newGroup = e.target.value
+                setSelectedGroup(newGroup)
+                const newFilteredData = newGroup === 'all' ? hanziData : hanziData.filter(item => item.group === newGroup)
+                startNewRound(newFilteredData)
               }}
               className="px-4 py-2 input border rounded-lg focus-accent"
             >
@@ -156,38 +143,44 @@ export default function LearnPage() {
                 </option>
               ))}
             </select>
+            <span className="text-sm text-muted">
+              (共 {filteredData.length} 字)
+            </span>
           </div>
-          
+          </div>
+
           {/* 九宫格汉字显示 */}
-          <HanziNineGrid 
-            data={currentHanzi} 
-            showMode={showMode}
-            onSpeak={speakText}
-          />
+          <div className="mt-6">
+            <HanziNineGrid 
+              data={currentHanzi} 
+              showMode={learningMode}
+              onSpeak={speakText}
+            />
+          </div>
 
           {/* 答案区域 */}
-          <div className="space-y-4 mt-8">
+          <div className="space-y-4 hanzi-muted mt-8">
             <div className="flex items-center gap-4">
               <label className=" font-medium">输入答案：</label>
               <input
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                placeholder={`输入对应的${showMode === 'fanti' ? '繁体' : '简体'}字`}
-                className="flex-1 px-4 py-3 input border rounded-lg focus-accent bg-white text-primary placeholder-muted transition-all duration-250"
+                placeholder={UI_TEXTS[learningMode].placeholder}
+                className="flex-1 px-4 py-3 input border rounded-lg focus-accent text-primary placeholder-muted transition-all duration-250"
               />
               <button
                 onClick={checkAnswer}
-                className="px-6 py-3  rounded-lg hover: transition-all duration-250 shadow-subtle"
+                className="px-6 py-3 border  rounded-lg hover: transition-all duration-250 shadow-subtle"
               >
                 检查答案
               </button>
               <button
-                onClick={() => setShowFanti(!showFanti)}
-                className="flex items-center gap-2 px-4 py-3 bg-white border  rounded-lg hover: transition-all duration-250"
+                onClick={() => setShowAnswer(!showAnswer)}
+                className="flex items-center gap-2 px-4 py-3 border rounded-lg hover: transition-all duration-250"
               >
-                {showFanti ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {showFanti ? '隐藏' : '显示'}答案
+                {showAnswer ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showAnswer ? '隐藏' : '显示'}答案
               </button>
             </div>
 
@@ -202,21 +195,18 @@ export default function LearnPage() {
                   <XCircle className="h-5 w-5" />
                 )}
                 <span className="font-medium">
-                  {feedback === 'correct' ? '回答正确！' : '回答错误，请再试一次。'}
+                  {feedback === 'correct' ? FEEDBACK_MESSAGES.CORRECT : FEEDBACK_MESSAGES.INCORRECT}
                 </span>
               </div>
             )}
 
             {/* 显示答案 */}
-            {showFanti && (
-              <div className=" border rounded-lg p-4">
+            {showAnswer && (
+              <div className="border rounded-lg p-4">
                 <div className="text-sm mb-2">正确答案：</div>
-                <div 
-                  className="text-2xl space-x-2"
-                  style={{ fontFamily: 'var(--font-serif)' }}
-                >
+                <div className="text-2xl space-x-2 hanzi-font-kai">
                   {currentHanzi.map((hanzi, index) => (
-                    <span key={index}>{safeValue(getChar(hanzi, showMode))}</span>
+                    <span key={index}>{safeValue(getCharacterByMode(hanzi, learningMode))}</span>
                   ))}
                 </div>
               </div>
@@ -225,13 +215,13 @@ export default function LearnPage() {
         </div>
 
         {/* 学习提示 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold  mb-2">学习提示</h3>
+        <div className="card border rounded-lg p-8">
+          <h3 className="font-bold mb-2">学习提示</h3>
           <ul className="text-sm  space-y-1">
-            <li>观察九宫格中的汉字，输入对应的{showMode === 'fanti' ? '繁体' : '简体'}字</li>
-            <li>点击"显示答案"可以查看正确答案</li>
-            <li>点击语音按钮可以听到标准发音</li>
-            <li>点击"换一批"可以练习新的汉字</li>
+            <li>观察九宫格中的汉字，输入对应的{learningMode === LEARNING_MODES.SIMPLIFIED ? '繁体' : '简体'}字</li>
+            <li>点击“显示答案”可以查看正确答案</li>
+            <li>点击语音按钮可以听到发音</li>
+            <li>点击“换一批”可以练习新的汉字</li>
           </ul>
         </div>
       </main>

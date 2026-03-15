@@ -1,14 +1,14 @@
 'use client'
 
+import { HanziItem, safeValue, speakText, tagMapping, tagShortMapping } from '@/lib/types'
 import { Volume2 } from 'lucide-react'
-import { HanziItem, safeValue, speakText, tagMapping } from '@/lib/types'
 
 interface HanziCardProps {
   hanzi: HanziItem
   showTags?: boolean
   showStrokeCount?: boolean
   showRadical?: boolean
-  showLevel?: boolean
+  showIDS?: boolean
   showGroup?: boolean
   showPinyin?: boolean
   showBothForms?: boolean
@@ -21,14 +21,14 @@ export default function HanziCard({
   showTags = true,
   showStrokeCount = true,
   showRadical = true,
-  showLevel = false,
+  showIDS = false,
   showGroup = true,
   showPinyin = true,
   showBothForms = true,
   compact = false,
   onClick
 }: HanziCardProps) {
-  const cardClass = compact 
+  const cardClass = compact
     ? "card p-3 cursor-pointer"
     : "card p-6 relative group cursor-pointer"
 
@@ -37,27 +37,6 @@ export default function HanziCard({
 
   return (
     <div className={cardClass} onClick={onClick}>
-      {!compact && (showLevel || showTags) && (
-        <div className="absolute top-3 right-3 flex flex-col gap-1">
-          {showTags && hanzi.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 justify-end">
-              {hanzi.tags.slice(0, 2).map(tag => (
-                <span
-                  key={tag}
-                  className="inline-block px-1 py-0.5 text-xs rounded bg-secondary text-muted border border-primary"
-                  title={tagMapping[tag] || tag}
-                >
-                  {tag}
-                </span>
-              ))}
-              {hanzi.tags.length > 2 && (
-                <span className="text-xs text-muted">+{hanzi.tags.length - 2}</span>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-      
       <button
         onClick={(e) => {
           e.stopPropagation()
@@ -67,33 +46,39 @@ export default function HanziCard({
       >
         <Volume2 className="h-4 w-4" />
       </button>
-      
+
       <div className="text-center">
-        <div 
-          className={`${charSize} hanzi hanzi-primary mb-3`}
-          style={{ fontFamily: 'var(--font-serif)' }}
+        <div
+          className={`${charSize} hanzi hanzi-primary hanzi-font-kai mb-3`}
         >
           {safeValue(hanzi.char)}
         </div>
-        
+
         {showBothForms && (
-          <div className={`grid grid-cols-2 gap-2 mb-3 ${formSize}`} 
-               style={{ fontFamily: 'var(--font-serif)' }}>
+          <div className={`grid grid-cols-2 gap-2 mb-3 ${formSize}`}>
             <div className="text-center">
-              <div className="text-xs mb-1">繁体</div>
-              <div className="">{safeValue(hanzi.trad)}</div>
+              {hanzi.trad ? (
+                <>
+                  <div className="text-xs mb-1">繁体</div>
+                  <div className="hanzi-font-kai">{safeValue(hanzi.trad)}</div>
+                </>
+              ) : ""}
             </div>
             <div className="text-center">
-              <div className="text-xs mb-1">简体</div>
-              <div className="">{safeValue(hanzi.simp)}</div>
+              {hanzi.simp ? (
+                <>
+                  <div className="text-xs mb-1">简体</div>
+                  <div className="hanzi-font-kai">{safeValue(hanzi.simp)}</div>
+                </>
+              ) : ""}
             </div>
           </div>
         )}
-        
+
         {showPinyin && (
           <div className="mb-2">{safeValue(hanzi.pinyin)}</div>
         )}
-        
+
         {(showStrokeCount || showRadical) && (
           <div className="flex justify-center gap-4 text-xs text-muted mb-2">
             {showStrokeCount && (
@@ -104,27 +89,30 @@ export default function HanziCard({
             )}
           </div>
         )}
-        
-        {showGroup && (
-          <div className="text-xs">{safeValue(hanzi.group)}</div>
+
+        {showIDS && (
+          <div className="text-xs">{safeValue(hanzi.ids)}</div>
         )}
-        
-        {showTags && hanzi.tags.length > 0 && !compact && (
-          <div className="mt-2 flex flex-wrap gap-1 justify-center">
-            {hanzi.tags.slice(0, 3).map(tag => (
-              <span
-                key={tag}
-                className="inline-block px-1 py-0.5 text-xs rounded bg-secondary text-muted border border-primary"
-                title={tagMapping[tag] || tag}
-              >
-                {tag}
-              </span>
-            ))}
-            {hanzi.tags.length > 3 && (
-              <span className="text-xs text-muted">+{hanzi.tags.length - 3}</span>
-            )}
-          </div>
-        )}
+
+        {showTags && hanzi.tags.length > 0 && !compact && (() => {
+          const filteredTags = hanzi.tags.filter(tag => tagShortMapping[tag]);
+          return filteredTags.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1 justify-center">
+              {filteredTags.slice(0, 3).map(tag => (
+                <span
+                  key={tag}
+                  className="inline-block px-1 py-0.5 text-xs rounded bg-secondary text-muted border border-primary"
+                  title={tagMapping[tag]}
+                >
+                  {tagShortMapping[tag]}
+                </span>
+              ))}
+              {filteredTags.length > 3 && (
+                <span className="text-xs text-muted">+{filteredTags.length - 3}</span>
+              )}
+            </div>
+          ) : null;
+        })()}
       </div>
     </div>
   )

@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Grid3X3, Table } from 'lucide-react'
 
 interface DisplayModeToggleProps {

@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-export const urlBase = process.env.NODE_ENV === 'production' ? '/learn-hanzi' : '';
+export const urlBase = process.env.NODE_ENV === 'production' ? '/hanzi' : '';
 
 const nextConfig: NextConfig = {
   output: 'export',

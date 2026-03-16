@@ -136,27 +136,38 @@ export default function Home() {
         </div>
 
         {/* 选中汉字详情 */}
-        {selectedHanzi.length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-primary">汉字详情</h2>
-              <DisplayModeToggle displayMode={displayMode} onModeChange={setDisplayMode} />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedHanzi([])}
+                  className="px-4 py-2 button-secondary"
+                >
+                  清空
+                </button>
+                <DisplayModeToggle displayMode={displayMode} onModeChange={setDisplayMode} />
+              </div>
             </div>
 
-            {displayMode === 'grid' ? (
-              <HanziGrid 
-                data={selectedHanzi} 
-                columns={4}
-                onCardClick={(hanzi) => {
-                  // Remove from selection when clicked in details
-                  setSelectedHanzi(prev => prev.filter(h => h.char !== hanzi.char))
-                }}
-              />
+            {selectedHanzi.length > 0 ? (
+              displayMode === 'grid' ? (
+                <HanziGrid 
+                  data={selectedHanzi} 
+                  columns={4}
+                  onCardClick={(hanzi) => {
+                    setSelectedHanzi(prev => prev.filter(h => h.char !== hanzi.char))
+                  }}
+                />
+              ) : (
+                <HanziTable data={selectedHanzi} showDict={true} showRadical={false} />
+              )
             ) : (
-              <HanziTable data={selectedHanzi} showDict={true}/>
+              <div className="text-center text-muted py-8">
+                请选择汉字查看详情
+              </div>
             )}
           </div>
-        )}
       </main>
     </div>
   )

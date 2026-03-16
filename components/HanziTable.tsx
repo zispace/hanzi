@@ -48,7 +48,7 @@ export default function HanziTable({
             {data.map((hanzi) => (
               <tr
                 key={`${hanzi.char}`}
-                className="border-b border-border-secondary hover-bg transition-colors duration-250 last:border-b-0"
+                className="border-b border-primary hover-bg transition-colors duration-250 last:border-b-0"
               >
                 <td className="px-4 py-3">
                   <span className="text-3xl hanzi hanzi-primary hanzi-font-kai">
@@ -103,7 +103,7 @@ export default function HanziTable({
                   </td>
                 )}
                 {showStrokeSequence && (
-                  <td className="px-4 py-3 flex items-center justify-center min-h-[60px]">
+                  <td className="px-6 py-4 flex items-center justify-center min-h-[60px]">
                     {hanzi.ordinal ? (
                       <img
                         src={`${STROKE_REPO}/${hanzi.ordinal.toString().padStart(4, '0')}.svg`}
@@ -123,7 +123,7 @@ export default function HanziTable({
                   </td>
                 )}
                 {showDict && (
-                  <td className="px-4 py-3 flex items-center justify-center">
+                  <td className="px-6 py-4 flex items-center justify-center">
                     {hanzi.ordinal ? (
                       <img
                         src={`${DICT_REPO}/${hanzi.ordinal.toString().padStart(4, '0')}.png`}

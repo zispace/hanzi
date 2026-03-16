@@ -181,7 +181,7 @@ export default function ListPage() {
             data={paginatedData}
             showTags={false}
             showStrokeCount={false}
-            showRadical={false}
+            showRadical={true}
             showActions={false}
             showStrokeSequence={true}
           />

@@ -5,6 +5,7 @@ import HanziGrid from '@/components/HanziGrid'
 import HanziTable from '@/components/HanziTable'
 import Header from '@/components/Header'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import { LIST_MODES, ListMode } from '@/lib/constants'
 import { loadHanziData } from '@/lib/dataLoader'
 import { HanziItem, safeValue } from '@/lib/types'
 import { Search, Shuffle } from 'lucide-react'
@@ -14,7 +15,7 @@ export default function Home() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedHanzi, setSelectedHanzi] = useState<HanziItem[]>([])
-  const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('table')
+  const [displayMode, setDisplayMode] = useState<ListMode>(LIST_MODES.TABLE)
   const [popularHanzi, setPopularHanzi] = useState<HanziItem[]>([])
   const displayCount = 10
 
@@ -37,16 +38,16 @@ export default function Home() {
 
   const searchResults = useMemo(() => {
     if (!searchTerm.trim()) return []
-    
+
     const searchChars = searchTerm.split('').filter(char => char.trim())
     const matchedItems = hanziData.filter((item: HanziItem) => {
-      return searchChars.some(char => 
+      return searchChars.some(char =>
         safeValue(item.char).includes(char) ||
         safeValue(item.trad).includes(char) ||
         safeValue(item.simp).includes(char)
       )
     })
-    
+
     // 去重：使用 Map 来确保唯一性，以汉字字符为键
     const uniqueItems = new Map<string, HanziItem>()
     matchedItems.forEach(item => {
@@ -55,7 +56,7 @@ export default function Home() {
         uniqueItems.set(char, item)
       }
     })
-    
+
     return Array.from(uniqueItems.values())
   }, [hanziData, searchTerm])
 
@@ -88,7 +89,7 @@ export default function Home() {
               style={{ paddingLeft: '3rem' }}
             />
           </div>
-          
+
           {/* 搜索结果 */}
           {searchResults.length > 0 && (
             <div className="mt-4 max-w-2xl mx-auto">
@@ -127,7 +128,7 @@ export default function Home() {
           <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
             {popularHanzi.map(hanzi => (
               <div key={hanzi.char} className="p-4 card hover-accent cursor-pointer hanzi-font-kai"
-                   onClick={() => handleHanziClick(hanzi)}>
+                onClick={() => handleHanziClick(hanzi)}>
                 <div className="text-2xl hanzi hanzi-primary text-center">{safeValue(hanzi.char)}</div>
                 <div className="text-xs text-muted text-center mt-1">{safeValue(hanzi.pinyin)}</div>
               </div>
@@ -136,38 +137,38 @@ export default function Home() {
         </div>
 
         {/* 选中汉字详情 */}
-          <div className="card p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-primary">汉字详情</h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSelectedHanzi([])}
-                  className="px-4 py-2 button-secondary"
-                >
-                  清空
-                </button>
-                <DisplayModeToggle displayMode={displayMode} onModeChange={setDisplayMode} />
-              </div>
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-primary">汉字详情</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedHanzi([])}
+                className="px-4 py-2 button-secondary"
+              >
+                清空
+              </button>
+              <DisplayModeToggle displayMode={displayMode} onModeChange={setDisplayMode} />
             </div>
-
-            {selectedHanzi.length > 0 ? (
-              displayMode === 'grid' ? (
-                <HanziGrid 
-                  data={selectedHanzi} 
-                  columns={4}
-                  onCardClick={(hanzi) => {
-                    setSelectedHanzi(prev => prev.filter(h => h.char !== hanzi.char))
-                  }}
-                />
-              ) : (
-                <HanziTable data={selectedHanzi} showDict={true} showRadical={false} />
-              )
-            ) : (
-              <div className="text-center text-muted py-8">
-                请选择汉字查看详情
-              </div>
-            )}
           </div>
+
+          {selectedHanzi.length > 0 ? (
+            displayMode === LIST_MODES.GRID ? (
+              <HanziGrid
+                data={selectedHanzi}
+                columns={4}
+                onCardClick={(hanzi) => {
+                  setSelectedHanzi(prev => prev.filter(h => h.char !== hanzi.char))
+                }}
+              />
+            ) : (
+              <HanziTable data={selectedHanzi} showDict={true} showRadical={false} />
+            )
+          ) : (
+            <div className="text-center text-muted py-8">
+              请选择汉字查看详情
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )

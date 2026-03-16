@@ -12,6 +12,7 @@
 
   --accent-primary: #DC143C;
   --accent-secondary: #B91C1C;
+  --accent-third: #B91C1C80;
 
   --border-primary: #E8E2D5;
   --border-secondary: #DFD6C4;
@@ -34,6 +35,7 @@
 
     --accent-primary: #FF6B6B;
     --accent-secondary: #FF5252;
+    --accent-third: #FF525280;
 
     --border-primary: #404040;
     --border-secondary: #555555;
@@ -49,7 +51,6 @@
 
 .stroke {
   transform: scale(1.5);
-
 }
 
 /* Base styles */
@@ -198,6 +199,10 @@ body {
     linear-gradient(to bottom, transparent 49.5%, var(--faded-color) 49.5%, var(--faded-color) 50.5%, transparent 50.5%),
     linear-gradient(45deg, transparent 49.5%, var(--faded-color) 49.5%, var(--faded-color) 50.5%, transparent 50.5%),
     linear-gradient(-45deg, transparent 49.5%, var(--faded-color) 49.5%, var(--faded-color) 50.5%, transparent 50.5%);
+}
+
+.hanzi-yiti {
+  color: var(--accent-third);
 }
 
 /* Navigation */

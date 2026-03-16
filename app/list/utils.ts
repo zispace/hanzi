@@ -1,6 +1,6 @@
 // 列表页面工具函数
 import { HanziItem } from '@/lib/types'
-import { PAGINATION } from './constants'
+import { PAGINATION } from '@/lib/constants'
 
 /**
  * 从数据中提取唯一分组列表

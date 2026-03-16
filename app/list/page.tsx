@@ -6,18 +6,19 @@ import HanziTable from '@/components/HanziTable'
 import Header from '@/components/Header'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown'
+import { LIST_MODES, ListMode, OPTION_MODES, OptionMode, PAGINATION, UI_LABELS } from '@/lib/constants'
 import { loadHanziData } from '@/lib/dataLoader'
 import { HanziItem, tagMapping } from '@/lib/types'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ChevronLeft, ChevronsLeft, ChevronRight, ChevronsRight, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { PAGINATION, UI_LABELS } from './constants'
 import { calculatePaginatedData, extractUniqueGroups, generatePageNumbers, groupFilter, searchFilter, tagsFilter } from './utils'
+
 
 export default function ListPage() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
-  const [filterMode, setFilterMode] = useState<'tags' | 'group'>('group')
+  const [displayMode, setDisplayMode] = useState<ListMode>(LIST_MODES.GRID)
+  const [filterMode, setFilterMode] = useState<OptionMode>(OPTION_MODES.GROUP)
   const [selectedGroup, setSelectedGroup] = useState('all')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -34,7 +35,7 @@ export default function ListPage() {
 
   const filterOptions = useMemo(() => {
     if (!hanziData.length) return []
-    if (filterMode === 'group') {
+    if (filterMode === OPTION_MODES.GROUP) {
       return extractUniqueGroups(hanziData)
     } else {
       return Object.keys(tagMapping)
@@ -48,9 +49,9 @@ export default function ListPage() {
       const matchesSearch = searchFilter(item, searchQuery)
 
       let matchesFilter = true
-      if (filterMode === 'group') {
+      if (filterMode === OPTION_MODES.GROUP) {
         matchesFilter = groupFilter(item, selectedGroup)
-      } else if (filterMode === 'tags') {
+      } else if (filterMode === OPTION_MODES.TAG) {
         matchesFilter = tagsFilter(item, selectedTags)
       }
 
@@ -102,18 +103,18 @@ export default function ListPage() {
               <select
                 value={filterMode}
                 onChange={(e) => {
-                  setFilterMode(e.target.value as 'tags' | 'group')
+                  setFilterMode(e.target.value as OptionMode)
                   setSelectedGroup('all')
                   setSelectedTags([])
                   setCurrentPage(1)
                 }}
                 className="px-4 py-3 input border rounded-lg focus-accent"
               >
-                <option value="group">{UI_LABELS.FILTER_GROUP}</option>
-                <option value="tags">{UI_LABELS.FILTER_TAGS}</option>
+                <option value={OPTION_MODES.GROUP}>{UI_LABELS.FILTER_GROUP}</option>
+                <option value={OPTION_MODES.TAG}>{UI_LABELS.FILTER_TAGS}</option>
               </select>
 
-              {filterMode === 'group' ? (
+              {filterMode === OPTION_MODES.GROUP ? (
                 <select
                   value={selectedGroup}
                   onChange={(e) => {
@@ -160,12 +161,12 @@ export default function ListPage() {
             <p className="">
               {UI_LABELS.RESULTS_TEXT.replace('{count}', filteredData.length.toString()).replace('{page}', currentPage.toString())}
             </p>
-            <DisplayModeToggle displayMode={displayMode} onModeChange={(mode) => setDisplayMode(mode as 'grid' | 'table')} />
+            <DisplayModeToggle displayMode={displayMode} onModeChange={(mode) => setDisplayMode(mode as ListMode)} />
           </div>
         </div>
 
         {/* 数据展示区域 */}
-        {displayMode === 'grid' ? (
+        {displayMode === LIST_MODES.GRID ? (
           <HanziGrid
             data={paginatedData}
             columns={5}
@@ -195,8 +196,7 @@ export default function ListPage() {
               disabled={currentPage === 1}
               className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover: disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
             >
-              <ChevronLeft className="h-4 w-4" />
-              <ChevronLeft className="h-4 w-4 -ml-2" />
+              <ChevronsLeft className="h-4 w-4 -mr-2" />
               {PAGINATION.FIRST_PAGE}
             </button>
 
@@ -239,8 +239,7 @@ export default function ListPage() {
               className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover: disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
             >
               {PAGINATION.LAST_PAGE}
-              <ChevronRight className="h-4 w-4" />
-              <ChevronRight className="h-4 w-4 -ml-2" />
+              <ChevronsRight className="h-4 w-4 -ml-2" />
             </button>
           </div>
         )}

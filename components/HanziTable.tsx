@@ -112,14 +112,12 @@ export default function HanziTable({
                         loading='lazy'
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
                         }}
                       />
                     ) : null}
                     {!hanzi.ordinal && (
                       <span className="text-muted">-</span>
                     )}
-                    <span className="hidden">{safeValue(hanzi.ordinal)}</span>
                   </td>
                 )}
                 {showDict && (

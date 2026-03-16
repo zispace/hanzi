@@ -3,26 +3,27 @@
 import HanziNineGrid from '@/components/HanziNineGrid'
 import Header from '@/components/Header'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import { DISPLAY_MODE_TEXTS, DISPLAY_MODES, DisplayMode, LEARNING_MODES, LearningMode, UI_TEXTS } from '@/lib/constants'
 import { loadHanziData } from '@/lib/dataLoader'
-import { HanziItem, safeValue, speakText } from '@/lib/types'
-import { CheckCircle, Eye, EyeOff, Shuffle, XCircle } from 'lucide-react'
+import { HanziItem, speakText } from '@/lib/types'
+import { ArrowLeft, ArrowRight, Eye, EyeOff, RotateCcw, Shuffle } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { FEEDBACK_MESSAGES, LEARNING_MODES, UI_TEXTS } from './constants'
-import { extractUniqueGroups, generateRandomHanzi, getCharacterByMode, validateAnswer } from './utils'
+import { extractUniqueGroups, generateRandomHanzi, generateSequentialHanzi, getCandidateData } from './utils'
 
 export default function LearnPage() {
+  const groupAll = "all";
+  const gridCount = 9;
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [currentHanzi, setCurrentHanzi] = useState<HanziItem[]>([])
   const [showAnswer, setShowAnswer] = useState(false)
-  const [userInput, setUserInput] = useState('')
-  const [learningMode, setLearningMode] = useState<typeof LEARNING_MODES[keyof typeof LEARNING_MODES]>(LEARNING_MODES.SIMPLIFIED)
-  const [score, setScore] = useState({ correct: 0, total: 0 })
-  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
-  const [selectedGroup, setSelectedGroup] = useState<string>('all')
+  const [learningMode, setLearningMode] = useState<LearningMode>(LEARNING_MODES.SIMPLIFIED)
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(DISPLAY_MODES.RANDOM)
+  const [selectedGroup, setSelectedGroup] = useState<string>(groupAll)
+  const [sequentialIndex, setSequentialIndex] = useState(0)
 
   useEffect(() => {
     loadHanziData().then(rawData => {
-      const data = rawData.filter(item => item.trad || item.simp || item.yiti) 
+      const data = rawData.filter(item => item.trad || item.simp || item.yiti)
       setHanziData(data)
       startNewRound(data)
     })
@@ -32,41 +33,72 @@ export default function LearnPage() {
   }, [])
 
   const groupOptions = useMemo(() => {
-    if (!hanziData.length) return ['all']
+    if (!hanziData.length) return [groupAll]
     const groups = extractUniqueGroups(hanziData)
-    return ['all', ...groups]
+    return [groupAll, ...groups]
   }, [hanziData])
 
   const filteredData = useMemo(() => {
-    if (selectedGroup === 'all') return hanziData
+    if (selectedGroup === groupAll) return hanziData
     return hanziData.filter(item => item.group === selectedGroup)
   }, [hanziData, selectedGroup])
 
-  const startNewRound = (data: HanziItem[]) => {
-    const randomHanzi = generateRandomHanzi(data)
-    setCurrentHanzi(randomHanzi)
+  const candidateData = useMemo(() => {
+    return getCandidateData(filteredData, learningMode)
+  }, [filteredData, learningMode])
+
+  const handlePrevious = () => {
+    if (candidateData.length === 0) return
+    const newIndex = Math.max(0, sequentialIndex - gridCount)
+    setSequentialIndex(newIndex)
+    const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
+    setCurrentHanzi(newHanzi)
+  }
+
+  const handleNext = () => {
+    if (candidateData.length === 0) return
+    const newIndex = sequentialIndex + gridCount
+    if (newIndex >= candidateData.length) return
+    setSequentialIndex(newIndex)
+    const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
+    setCurrentHanzi(newHanzi)
+  }
+
+  // 键盘快捷键翻页
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (displayMode === DISPLAY_MODES.SEQUENTIAL) {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault()
+          handlePrevious()
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault()
+          handleNext()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [displayMode, sequentialIndex, candidateData])
+
+  const startNewRound = (data: HanziItem[], reset: boolean = false, numOfChars: number = gridCount) => {
+    const candidates = getCandidateData(data, learningMode)
+    if (candidates.length === 0) return
+
+    let newHanzi: HanziItem[] = []
+    if (displayMode === DISPLAY_MODES.RANDOM) {
+      newHanzi = generateRandomHanzi(candidates, numOfChars)
+    } else {
+      newHanzi = generateSequentialHanzi(candidates, sequentialIndex, numOfChars)
+      if (!reset) {
+        setSequentialIndex(prev => (prev + numOfChars) % candidates.length)
+      }
+    }
+
+    setCurrentHanzi(newHanzi)
     setShowAnswer(false)
-    setUserInput('')
-    setFeedback(null)
   }
-
-  const checkAnswer = () => {
-    if (!currentHanzi.length) return
-    
-    const targetChars = currentHanzi.map(h => getCharacterByMode(h, learningMode))
-    const isCorrect = validateAnswer(userInput, targetChars)
-    
-    setFeedback(isCorrect ? 'correct' : 'incorrect')
-    setScore(prev => ({
-      correct: prev.correct + (isCorrect ? 1 : 0),
-      total: prev.total + 1
-    }))
-    
-    setTimeout(() => {
-      setFeedback(null)
-    }, 2000)
-  }
-
 
   if (!hanziData.length) {
     return <LoadingSpinner />
@@ -78,151 +110,168 @@ export default function LearnPage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 控制区域 */}
-
         <div className="shadow-soft p-6 mb-8">
+          {/* 学习模式选择 */}
           <div className="card p-6 mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">
-                {UI_TEXTS[learningMode].title}
-              </h2>
-              <div className="text-sm text-muted">
-                {UI_TEXTS[learningMode].instruction}
+            <h2 className="text-lg font-semibold mb-4">学习模式</h2>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="simplified-mode"
+                  name="learning-mode"
+                  checked={learningMode === LEARNING_MODES.SIMPLIFIED}
+                  onChange={() => {
+                    setLearningMode(LEARNING_MODES.SIMPLIFIED)
+                    setSequentialIndex(0)
+                    startNewRound(filteredData)
+                  }}
+                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
+                />
+                <label htmlFor="simplified-mode" className="text-sm font-medium">
+                  {UI_TEXTS[LEARNING_MODES.SIMPLIFIED].button}
+                </label>
               </div>
-              <div className="text-sm ">
-                得分: <span className="font-bold ">{score.correct}</span> / {score.total}
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="traditional-mode"
+                  name="learning-mode"
+                  checked={learningMode === LEARNING_MODES.TRADITIONAL}
+                  onChange={() => {
+                    setLearningMode(LEARNING_MODES.TRADITIONAL)
+                    setSequentialIndex(0)
+                    startNewRound(filteredData)
+                  }}
+                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
+                />
+                <label htmlFor="traditional-mode" className="text-sm font-medium">
+                  {UI_TEXTS[LEARNING_MODES.TRADITIONAL].button}
+                </label>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setLearningMode(LEARNING_MODES.SIMPLIFIED)}
-                className={`px-4 py-2 rounded-lg transition-all duration-300 transform ${
-                  learningMode === LEARNING_MODES.SIMPLIFIED 
-                    ? 'button-primary scale-105 shadow-subtle' 
-                    : 'button-secondary hover:scale-105'
-                }`}
+
+            {/* 显示模式选择 */}
+            <h3 className="text-md font-semibold mb-3">显示模式</h3>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="random-mode"
+                  name="display-mode"
+                  checked={displayMode === DISPLAY_MODES.RANDOM}
+                  onChange={() => {
+                    setDisplayMode(DISPLAY_MODES.RANDOM)
+                    setSequentialIndex(0)
+                    startNewRound(filteredData)
+                  }}
+                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
+                />
+                <label htmlFor="random-mode" className="text-sm font-medium">
+                  {DISPLAY_MODE_TEXTS[DISPLAY_MODES.RANDOM].title}
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="sequential-mode"
+                  name="display-mode"
+                  checked={displayMode === DISPLAY_MODES.SEQUENTIAL}
+                  onChange={() => {
+                    setDisplayMode(DISPLAY_MODES.SEQUENTIAL)
+                    setSequentialIndex(0)
+                    startNewRound(filteredData)
+                  }}
+                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
+                />
+                <label htmlFor="sequential-mode" className="text-sm font-medium">
+                  {DISPLAY_MODE_TEXTS[DISPLAY_MODES.SEQUENTIAL].title}
+                </label>
+              </div>
+            </div>
+
+            {/* 分组选择器 */}
+            <div className="flex items-center gap-4 mb-6">
+              <label className="text-sm font-medium">选择分组：</label>
+              <select
+                value={selectedGroup}
+                onChange={(e) => {
+                  const newGroup = e.target.value
+                  setSelectedGroup(newGroup)
+                  setSequentialIndex(0)
+                  const newFilteredData = newGroup === groupAll ? hanziData : hanziData.filter(item => item.group === newGroup)
+                  startNewRound(newFilteredData)
+                }}
+                className="px-4 py-2 input border rounded-lg focus-accent"
               >
-                {UI_TEXTS[LEARNING_MODES.SIMPLIFIED].button}
+                {groupOptions.map(group => (
+                  <option key={group} value={group}>
+                    {group === groupAll ? '全部' : group}
+                  </option>
+                ))}
+              </select>
+              <span className="text-sm text-muted">
+                (共 {candidateData.length} 字)
+              </span>
+            </div>
+
+            {/* 操作按钮 */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => startNewRound(filteredData, true)}
+                className="flex items-center gap-2 px-4 py-2 button-primary hover:scale-105 transition-all duration-300 transform"
+              >
+                {displayMode === DISPLAY_MODES.RANDOM ? <><Shuffle className="h-4 w-4" />换一批</> : <><RotateCcw className="h-4 w-4" />重新开始</>}
               </button>
+
+              {displayMode === DISPLAY_MODES.SEQUENTIAL && (
+                <>
+                  <button
+                    onClick={handlePrevious}
+                    disabled={sequentialIndex === 0}
+                    className="flex items-center gap-2 px-4 py-2 button-secondary hover:scale-105 transition-all duration-300 transform disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    上一批
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    disabled={sequentialIndex + gridCount >= candidateData.length}
+                    className="flex items-center gap-2 px-4 py-2 button-secondary hover:scale-105 transition-all duration-300 transform disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    下一批
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                  <span className="text-sm text-muted">
+                    进度: {Math.floor(sequentialIndex / gridCount) + 1} / {Math.ceil(candidateData.length / gridCount)}
+                  </span>
+                </>
+              )}
+
               <button
-                onClick={() => setLearningMode(LEARNING_MODES.TRADITIONAL)}
-                className={`px-4 py-2 rounded-lg transition-all duration-300 transform ${
-                  learningMode === LEARNING_MODES.TRADITIONAL 
-                    ? 'button-primary scale-105 shadow-subtle' 
-                    : 'button-secondary hover:scale-105'
-                }`}
+                onClick={() => setShowAnswer(!showAnswer)}
+                className={`flex items-center gap-2 px-4 py-2 transition-all duration-300 transform ${showAnswer
+                  ? 'button-accent hover:scale-105'
+                  : 'button-secondary hover:scale-105'
+                  }`}
               >
-                {UI_TEXTS[LEARNING_MODES.TRADITIONAL].button}
-              </button>
-              <button
-                onClick={() => startNewRound(filteredData)}
-                className="flex items-center gap-2 px-4 py-2 button-secondary hover:scale-105 transition-all duration-300 transform"
-              >
-                <Shuffle className="h-4 w-4" />
-                换一批
+                {showAnswer ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showAnswer ? '隐藏答案' : '显示答案'}
               </button>
             </div>
-          </div>
-          
-          {/* 分组选择器 */}
-          <div className="flex items-center gap-4">
-            <label className="text-sm font-medium">选择分组：</label>
-            <select
-              value={selectedGroup}
-              onChange={(e) => {
-                const newGroup = e.target.value
-                setSelectedGroup(newGroup)
-                const newFilteredData = newGroup === 'all' ? hanziData : hanziData.filter(item => item.group === newGroup)
-                startNewRound(newFilteredData)
-              }}
-              className="px-4 py-2 input border rounded-lg focus-accent"
-            >
-              {groupOptions.map(group => (
-                <option key={group} value={group}>
-                  {group === 'all' ? '全部' : group}
-                </option>
-              ))}
-            </select>
-            <span className="text-sm text-muted">
-              (共 {filteredData.length} 字)
-            </span>
-          </div>
           </div>
 
           {/* 九宫格汉字显示 */}
           <div className="mt-6">
-            <HanziNineGrid 
-              data={currentHanzi} 
+            <HanziNineGrid
+              data={currentHanzi}
               showMode={learningMode}
+              showAnswer={showAnswer}
               onSpeak={speakText}
             />
           </div>
-
-          {/* 答案区域 */}
-          <div className="space-y-4 hanzi-muted mt-8">
-            <div className="flex items-center gap-4">
-              <label className=" font-medium">输入答案：</label>
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder={UI_TEXTS[learningMode].placeholder}
-                className="flex-1 px-4 py-3 input border rounded-lg focus-accent text-primary placeholder-muted transition-all duration-250"
-              />
-              <button
-                onClick={checkAnswer}
-                className="px-6 py-3 border  rounded-lg hover: transition-all duration-250 shadow-subtle"
-              >
-                检查答案
-              </button>
-              <button
-                onClick={() => setShowAnswer(!showAnswer)}
-                className="flex items-center gap-2 px-4 py-3 border rounded-lg hover: transition-all duration-250"
-              >
-                {showAnswer ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {showAnswer ? '隐藏' : '显示'}答案
-              </button>
-            </div>
-
-            {/* 反馈信息 */}
-            {feedback && (
-              <div className={`flex items-center gap-2 p-4 rounded-lg ${
-                feedback === 'correct' ? 'bg-green-50  border border-green-200' : 'bg-red-50  border border-red-200'
-              }`}>
-                {feedback === 'correct' ? (
-                  <CheckCircle className="h-5 w-5" />
-                ) : (
-                  <XCircle className="h-5 w-5" />
-                )}
-                <span className="font-medium">
-                  {feedback === 'correct' ? FEEDBACK_MESSAGES.CORRECT : FEEDBACK_MESSAGES.INCORRECT}
-                </span>
-              </div>
-            )}
-
-            {/* 显示答案 */}
-            {showAnswer && (
-              <div className="border rounded-lg p-4">
-                <div className="text-sm mb-2">正确答案：</div>
-                <div className="text-2xl space-x-2 hanzi-font-kai">
-                  {currentHanzi.map((hanzi, index) => (
-                    <span key={index}>{safeValue(getCharacterByMode(hanzi, learningMode))}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 学习提示 */}
-        <div className="card border rounded-lg p-8">
-          <h3 className="font-bold mb-2">学习提示</h3>
-          <ul className="text-sm  space-y-1">
-            <li>观察九宫格中的汉字，输入对应的{learningMode === LEARNING_MODES.SIMPLIFIED ? '繁体' : '简体'}字</li>
-            <li>点击“显示答案”可以查看正确答案</li>
-            <li>点击语音按钮可以听到发音</li>
-            <li>点击“换一批”可以练习新的汉字</li>
-          </ul>
         </div>
       </main>
     </div>

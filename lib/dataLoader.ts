@@ -1,4 +1,5 @@
 import { HanziItem } from '@/lib/types'
+import nextConfig from '@/next.config'; 
 
 let globalDataCache: HanziItem[] | null = null
 
@@ -23,8 +24,8 @@ export const loadHanziData = async (): Promise<HanziItem[]> => {
 
   try {
     const [data1, data2] = await Promise.all([
-      fetch('/data/data1.json').then(response => response.json()),
-      fetch('/data/data2.json').then(response => response.json())
+      fetch(`${nextConfig.basePath}/data/data1.json`).then(response => response.json()),
+      fetch(`${nextConfig.basePath}/data/data2.json`).then(response => response.json())
     ])
 
     const combinedData = [...data1, ...data2]

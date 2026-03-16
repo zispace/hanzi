@@ -1,6 +1,7 @@
 'use client'
 
 import { BookOpen } from 'lucide-react'
+import nextConfig from '@/next.config'; 
 
 interface HeaderProps {
   currentPage: 'home' | 'list' | 'learn'
@@ -26,7 +27,7 @@ export default function Header({ currentPage, title }: HeaderProps) {
   }
 
   return (
-    <header className=" border-b shadow-subtle">
+    <header className="border-b border-secondary shadow-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -38,9 +39,9 @@ export default function Header({ currentPage, title }: HeaderProps) {
             </h1>
           </div>
           <nav className="flex gap-2 p-1 rounded-lg">
-            <a href="/" className={getNavClass('home')}>首页</a>
-            <a href="/learn" className={getNavClass('learn')}>学习</a>
-            <a href="/list" className={getNavClass('list')}>列表</a>
+            <a href={`${nextConfig.basePath}/`} className={getNavClass('home')}>首页</a>
+            <a href={`${nextConfig.basePath}/learn/`} className={getNavClass('learn')}>学习</a>
+            <a href={`${nextConfig.basePath}/list/`} className={getNavClass('list')}>列表</a>
           </nav>
         </div>
       </div>

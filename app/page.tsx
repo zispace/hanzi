@@ -153,7 +153,7 @@ export default function Home() {
                 }}
               />
             ) : (
-              <HanziTable data={selectedHanzi} />
+              <HanziTable data={selectedHanzi} showDict={true}/>
             )}
           </div>
         )}

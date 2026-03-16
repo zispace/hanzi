@@ -88,7 +88,10 @@ export default function ListPage() {
                 type="text"
                 placeholder="搜索汉字、拼音..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setCurrentPage(1)
+                }}
                 className="flex-1 pl-12 pr-4 py-3 input border rounded-lg focus-accent"
                 style={{ paddingLeft: '3rem' }}
               />
@@ -176,15 +179,27 @@ export default function ListPage() {
         ) : (
           <HanziTable
             data={paginatedData}
-            showTags={true}
-            showStrokeCount={true}
-            showRadical={true}
+            showTags={false}
+            showStrokeCount={false}
+            showRadical={false}
+            showActions={false}
+            showStrokeSequence={true}
           />
         )}
 
         {/* 分页控件 */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-8">
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover: disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 -ml-2" />
+              {PAGINATION.FIRST_PAGE}
+            </button>
+
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -216,6 +231,16 @@ export default function ListPage() {
             >
               {PAGINATION.NEXT_PAGE}
               <ChevronRight className="h-4 w-4" />
+            </button>
+
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover: disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-250 shadow-subtle"
+            >
+              {PAGINATION.LAST_PAGE}
+              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 -ml-2" />
             </button>
           </div>
         )}

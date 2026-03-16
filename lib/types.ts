@@ -2,6 +2,7 @@ export interface HanziItem {
   char: string
   simp: string
   trad: string
+  yiti: string
   ordinal: number | null
   pinyin: string
   strokeCount: number
@@ -12,8 +13,8 @@ export interface HanziItem {
   tags: string[]
 }
 
-export const safeValue = (value: any) => {
-  return value || ''
+export const safeValue = (value: any, defaultValue: string = "") => {
+  return value || defaultValue
 }
 
 export const tagMapping: Record<string, string> = {
@@ -22,12 +23,15 @@ export const tagMapping: Record<string, string> = {
   "a3": "通用规范三级字（2013）",
   "b1": "常用字（1988）",
   "b2": "通用字（1988）",
+  "b3": "简化字表一（1986）",
+  "b4": "简化字表二（1986）",
+  "b5": "简化字表三（1986）",
   "c1": "义务教育教学基本字（2022）",
   "c2": "义务教育常用字表一（2022）",
   "c3": "义务教育常用字表二（2022）",
   "d1": "汉语应用水平/HZC（2016）",
   "d2": "国际中文教育/HSK手写字（2021）",
-  "d4": "国际中文教育/HSK（2021）",
+  "d3": "国际中文教育/HSK（2021）",
   "e1": "GB2312",
   "e2": "GB12345",
   "e3": "Big5常用字",
@@ -44,7 +48,7 @@ export const tagMapping: Record<string, string> = {
   "h3": "异体字",
   "i1": "部首",
   "i2": "化学用字",
-  "i3": "地名生僻字/多音字"
+  "i3": "地名用字",
 }
 
 

@@ -5,7 +5,7 @@ import { Volume2 } from 'lucide-react';
 
 function getChar(hanzi: HanziItem, showMode: 'fanti' | 'jianti') {
   const targetField = showMode === 'fanti' ? hanzi.simp : hanzi.trad;
-  return targetField || hanzi.char;
+  return (targetField || hanzi.char).replace("～", "");
 }
 
 interface HanziNineGridProps {
@@ -16,17 +16,24 @@ interface HanziNineGridProps {
 
 export default function HanziNineGrid({ data, showMode, onSpeak }: HanziNineGridProps) {
   return (
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-3 gap-2">
       {data.map((hanzi, index) => (
         <div key={hanzi.char} className="relative group">
           <div className="bg-gradient-to-br to-secondary border-2 rounded-xl p-8 flex items-center justify-center card">
             <div className="text-center">
-              <div className="text-6xl hanzi hanzi-primary hanzi-font-kai mb-3 calligraphy-grid rounded-lg p-4">
+              <div className="text-8xl hanzi hanzi-primary hanzi-font-kai mb-3 calligraphy-grid rounded-lg p-4">
                 {safeValue(getChar(hanzi, showMode))}
               </div>
-              
-              <div className="text-sm hanzi-muted mb-3">{safeValue(hanzi.pinyin)}</div>
-              
+              <div className="text-sm hanzi-muted mb-3">
+                {safeValue(hanzi.yiti) && (
+                  <>
+                    <span className="w-2 hanzi-font-kai text-xl">
+                      〔{safeValue(hanzi.yiti, "--")}〕 
+                     </span>
+                  </>
+                )}
+                {safeValue(hanzi.pinyin)}
+              </div>
               <button
                 onClick={() => {
                   const text = safeValue(hanzi.char)

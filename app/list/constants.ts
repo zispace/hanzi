@@ -25,6 +25,8 @@ export const UI_LABELS = {
 } as const
 
 export const PAGINATION = {
+  FIRST_PAGE: '首页',
+  LAST_PAGE: '末页',
   PREV_PAGE: '上一页',
   NEXT_PAGE: '下一页',
   MAX_VISIBLE_PAGES: 5

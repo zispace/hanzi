@@ -3,19 +3,29 @@
 
 :root {
   /* Core Colors - 60-30-10 Rule */
-  --bg-primary: #FAF9F6;      /* 60% - Paper-like background */
-  --bg-secondary: #F5F2ED;    /* Card and hover states */
-  --bg-white: #FFFFFF;         /* Pure white */
-  
-  --text-primary: #1A1A1A;    /* 30% - Main text */
-  --text-secondary: #5A5A5A;  /* Secondary text */
-  --text-muted: #3A3A3A;      /* Muted text (pinyin) */
-  
-  --accent-primary: #DC143C;   /* 10% - Traditional Chinese red */
-  --accent-secondary: #B91C1C; /* Hover accent */
-  
-  --border-primary: #E8E2D5;  /* Soft borders */
-  --border-secondary: #DFD6C4; /* Hover borders */
+  --bg-primary: #FAF9F6;
+  /* 60% - Paper-like background */
+  --bg-secondary: #F5F2ED;
+  /* Card and hover states */
+  --bg-white: #FFFFFF;
+  /* Pure white */
+
+  --text-primary: #1A1A1A;
+  /* 30% - Main text */
+  --text-secondary: #5A5A5A;
+  /* Secondary text */
+  --text-muted: #3A3A3A;
+  /* Muted text (pinyin) */
+
+  --accent-primary: #DC143C;
+  /* 10% - Traditional Chinese red */
+  --accent-secondary: #B91C1C;
+  /* Hover accent */
+
+  --border-primary: #E8E2D5;
+  /* Soft borders */
+  --border-secondary: #DFD6C4;
+  /* Hover borders */
 
   /* Font Families */
   --font-sans: 'Heiti SC', 'SimHei', 'Microsoft YaHei', sans-serif;
@@ -39,6 +49,17 @@
     --border-primary: #404040;
     --border-secondary: #555555;
   }
+
+  .meaning,
+  .stroke {
+    filter: invert(80%);
+    transition: filter 0.3s ease;
+  }
+}
+
+.stroke {
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 /* Base styles */
@@ -49,16 +70,37 @@ body {
 }
 
 /* Essential utility classes */
-.bg-primary { background-color: var(--bg-primary); }
-.bg-secondary { background-color: var(--bg-secondary); }
-.bg-white { background-color: var(--bg-white); }
+.bg-primary {
+  background-color: var(--bg-primary);
+}
 
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-muted { color: var(--text-muted); }
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
 
-.border-primary { border-color: var(--border-primary); }
-.border-secondary { border-color: var(--border-secondary); }
+.bg-white {
+  background-color: var(--bg-white);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.border-primary {
+  border-color: var(--border-primary);
+}
+
+.border-secondary {
+  border-color: var(--border-secondary);
+}
 
 /* Component styles */
 .card {

@@ -22,7 +22,7 @@ export default function LearnPage() {
 
   useEffect(() => {
     loadHanziData().then(rawData => {
-      const data = rawData.filter(item => item.trad || item.simp)
+      const data = rawData.filter(item => item.trad || item.simp || item.yiti) 
       setHanziData(data)
       startNewRound(data)
     })

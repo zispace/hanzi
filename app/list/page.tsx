@@ -14,11 +14,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { calculatePaginatedData, extractUniqueGroups, generatePageNumbers, groupFilter, searchFilter, tagsFilter } from './utils'
 
 export default function ListPage() {
+  const groupAll = "all";
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [displayMode, setDisplayMode] = useState<ListMode>(LIST_MODES.GRID)
   const [filterMode, setFilterMode] = useState<OptionMode>(OPTION_MODES.GROUP)
-  const [selectedGroup, setSelectedGroup] = useState('all')
+  const [selectedGroup, setSelectedGroup] = useState(groupAll)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
@@ -84,7 +85,6 @@ export default function ListPage() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [displayMode, filterOptions, filteredData, paginatedData, totalPages])
 
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
   }
@@ -112,7 +112,7 @@ export default function ListPage() {
                   setSearchQuery(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="flex-1 pl-12 pr-4 py-3 input border rounded-lg focus-accent"
+                className="flex-1 pl-12 pr-4 py-3 input border rounded-lg"
                 style={{ paddingLeft: '3rem' }}
               />
             </div>
@@ -123,11 +123,11 @@ export default function ListPage() {
                 value={filterMode}
                 onChange={(e) => {
                   setFilterMode(e.target.value as OptionMode)
-                  setSelectedGroup('all')
+                  setSelectedGroup(groupAll)
                   setSelectedTags([])
                   setCurrentPage(1)
                 }}
-                className="px-4 py-3 input border rounded-lg focus-accent"
+                className="px-4 py-3 input border rounded-lg"
               >
                 <option value={OPTION_MODES.GROUP}>{UI_LABELS.FILTER_GROUP}</option>
                 <option value={OPTION_MODES.TAG}>{UI_LABELS.FILTER_TAGS}</option>
@@ -140,9 +140,9 @@ export default function ListPage() {
                     setSelectedGroup(e.target.value)
                     setCurrentPage(1)
                   }}
-                  className="px-4 py-3 input border rounded-lg focus-accent min-w-[120px]"
+                  className="px-4 py-3 input border rounded-lg min-w-[120px]"
                 >
-                  <option value="all">{UI_LABELS.CLEAR_ALL}</option>
+                  <option value={groupAll}>{UI_LABELS.CLEAR_ALL}</option>
                   {filterOptions.map(option => (
                     <option key={option} value={option}>{option}</option>
                   ))}
@@ -166,7 +166,7 @@ export default function ListPage() {
                   setItemsPerPage(Number(e.target.value))
                   setCurrentPage(1)
                 }}
-                className="px-4 py-3 input border rounded-lg focus-accent"
+                className="px-4 py-3 input border rounded-lg"
               >
                 {UI_LABELS.ITEMS_PER_PAGE.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -185,7 +185,7 @@ export default function ListPage() {
                 <select
                   value={tableDisplayMode}
                   onChange={(e) => setTableDisplayMode(e.target.value as TableMode)}
-                  className="px-3 py-2 input border rounded-lg focus-accent text-sm"
+                  className="px-3 py-2 input border rounded-lg text-sm"
                 >
                   <option value={TABLE_MODES.DICT}>释义</option>
                   <option value={TABLE_MODES.STROKE}>笔顺</option>

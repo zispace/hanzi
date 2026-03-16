@@ -18,9 +18,10 @@
   --border-secondary: #DFD6C4;
   --faded-color: #DFD6C480;
 
-  --font-sans: 'Heiti SC', 'SimHei', 'Microsoft YaHei', sans-serif;
-  --font-serif: 'Songti SC', 'SimSun', serif;
-  --font-kai: 'KaiTi', 'STKaiti', 'Songti SC', 'SimSun', serif;
+  --font-sans: "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", system-ui, -apple-system, sans-serif;
+  /* --font-serif: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", "SimSun", serif; */
+  --font-kai: 'KaiTi', 'STKaiti', "楷体", "华文楷体", "Kaiti SC", "AR PL UKai CN", "AR PL KaitiM GB", 'Songti SC', 'SimSun', serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -146,7 +147,7 @@ body {
 
 .input:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px var(--accent-primary);
+  box-shadow: 0 0 0 1px var(--accent-primary);
   outline: none;
 }
 

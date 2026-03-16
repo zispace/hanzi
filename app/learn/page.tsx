@@ -228,7 +228,7 @@ export default function LearnPage() {
                 onClick={() => {
                   startNewRound(filteredData, true)
                 }}
-                className="flex items-center gap-2 px-4 py-2 button-primary hover:scale-105 transition-all duration-300 transform"
+                className="flex items-center gap-2 px-4 py-2 button-secondary hover:scale-105 transition-all duration-300 transform"
               >
                 {displayMode === DISPLAY_MODES.RANDOM ? <><Shuffle className="h-4 w-4" />换一批</> : <><RotateCcw className="h-4 w-4" />重新开始</>}
               </button>

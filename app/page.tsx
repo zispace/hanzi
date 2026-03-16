@@ -101,7 +101,7 @@ export default function Home() {
                     className="px-3 py-2 card hover-accent"
                   >
                     <span className="text-lg hanzi hanzi-primary">{safeValue(hanzi.char)}</span>
-                    <span className="ml-2 text-sm text-muted">{safeValue(hanzi.pinyin)}</span>
+                    <span className="ml-2 text-sm text-muted"><code>{safeValue(hanzi.pinyin)}</code></span>
                   </button>
                 ))}
               </div>
@@ -129,7 +129,7 @@ export default function Home() {
               <div key={hanzi.char} className="p-4 card hover-accent cursor-pointer hanzi-font-kai"
                 onClick={() => handleHanziClick(hanzi)}>
                 <div className="text-2xl hanzi hanzi-primary text-center">{safeValue(hanzi.char)}</div>
-                <div className="text-xs text-muted text-center mt-1">{safeValue(hanzi.pinyin)}</div>
+                <div className="text-xs text-muted text-center mt-1"><code>{safeValue(hanzi.pinyin)}</code></div>
               </div>
             ))}
           </div>

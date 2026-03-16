@@ -13,7 +13,7 @@ export default function DisplayModeToggle({ displayMode, onModeChange }: Display
     <div className="flex gap-1 p-1 rounded-lg">
       <button
         onClick={() => onModeChange(LIST_MODES.GRID)}
-        className={`p-2 rounded-md transition-all duration-250 ${displayMode === LIST_MODES.GRID
+        className={`p-2 rounded-md transition-all duration-250 cursor-pointer ${displayMode === LIST_MODES.GRID
             ? ' shadow-subtle'
             : ' hover: hover:'
           }`}
@@ -22,7 +22,7 @@ export default function DisplayModeToggle({ displayMode, onModeChange }: Display
       </button>
       <button
         onClick={() => onModeChange('table')}
-        className={`p-2 rounded-md transition-all duration-250 ${displayMode === 'table'
+        className={`p-2 rounded-md transition-all duration-250 cursor-pointer ${displayMode === 'table'
             ? ' shadow-subtle'
             : ' hover: hover:'
           }`}

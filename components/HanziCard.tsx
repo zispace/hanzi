@@ -1,7 +1,7 @@
 'use client'
 
 import { HanziItem, safeValue, speakText, tagMapping, tagShortMapping } from '@/lib/types'
-import { Volume2 } from 'lucide-react'
+import { Volume2, Trash } from 'lucide-react'
 
 interface HanziCardProps {
   hanzi: HanziItem
@@ -14,6 +14,7 @@ interface HanziCardProps {
   showBothForms?: boolean
   compact?: boolean
   onClick?: () => void
+  onDelete?: () => void
 }
 
 export default function HanziCard({
@@ -26,23 +27,35 @@ export default function HanziCard({
   showPinyin = true,
   showBothForms = true,
   compact = false,
-  onClick
+  onClick,
+  onDelete
 }: HanziCardProps) {
   const cardClass = compact
-    ? "card p-3 cursor-pointer"
-    : "card p-6 relative group cursor-pointer"
+    ? "card p-3 relative group"
+    : "card p-6 relative group"
 
   const charSize = compact ? "text-2xl" : "text-4xl"
   const formSize = compact ? "text-sm" : "text-lg"
 
   return (
-    <div className={cardClass} onClick={onClick}>
+    <div className={cardClass}>
+      {onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete()
+          }}
+          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-250 p-2 text-white rounded-full"
+        >
+          <Trash className="h-4 w-4" />
+        </button>
+      )}
       <button
         onClick={(e) => {
           e.stopPropagation()
           speakText(safeValue(hanzi.char))
         }}
-        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-250 p-2 bg-white rounded-full"
+        className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-250 p-2 bg-white rounded-full"
       >
         <Volume2 className="h-4 w-4" />
       </button>
@@ -57,9 +70,17 @@ export default function HanziCard({
         {showBothForms && (
           <div className={`grid grid-cols-2 gap-2 mb-3 ${formSize}`}>
             <div className="text-center">
+              {hanzi.simp ? (
+                <>
+                  <div className="text-xs mb-1">〖简体〗</div>
+                  <div className="hanzi-font-kai">{safeValue(hanzi.simp)}</div>
+                </>
+              ) : ""}
+            </div>
+            <div className="text-center">
               {hanzi.trad ? (
                 <>
-                  <div className="text-xs mb-1">繁体</div>
+                  <div className="text-xs mb-1">〖繁体〗</div>
                   <div className="hanzi-font-kai">{safeValue(hanzi.trad)}</div>
                 </>
               ) : ""}
@@ -67,8 +88,8 @@ export default function HanziCard({
             <div className="text-center">
               {hanzi.simp ? (
                 <>
-                  <div className="text-xs mb-1">简体</div>
-                  <div className="hanzi-font-kai">{safeValue(hanzi.simp)}</div>
+                  <div className="text-xs mb-1">〖异体〗</div>
+                  <div className="hanzi-font-kai">{safeValue(hanzi.yiti)}</div>
                 </>
               ) : ""}
             </div>
@@ -76,16 +97,16 @@ export default function HanziCard({
         )}
 
         {showPinyin && (
-          <div className="mb-2">{safeValue(hanzi.pinyin)}</div>
+          <div className="mb-2"><code>{safeValue(hanzi.pinyin)}</code></div>
         )}
 
         {(showStrokeCount || showRadical) && (
           <div className="flex justify-center gap-4 text-xs text-muted mb-2">
             {showStrokeCount && (
-              <span>笔画: {hanzi.strokeCount}</span>
+              <span>【笔画】{hanzi.strokeCount}</span>
             )}
             {showRadical && hanzi.radical && (
-              <span>部首: {hanzi.radical}</span>
+              <span>【部首】{hanzi.radical}</span>
             )}
           </div>
         )}

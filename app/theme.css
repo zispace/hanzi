@@ -42,14 +42,14 @@
     --faded-color: #55555580;
   }
 
-  .meaning,
-  .stroke {
+  .img-meaning,
+  .img-stroke {
     filter: invert(80%);
     transition: filter 0.3s ease;
   }
 }
 
-.stroke {
+.img-stroke {
   transform: scale(1.5);
 }
 

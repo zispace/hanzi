@@ -10,10 +10,10 @@ interface MultiSelectDropdownProps {
   placeholder?: string
 }
 
-export default function MultiSelectDropdown({ 
-  selectedTags, 
-  onTagsChange, 
-  placeholder = "选择标签..." 
+export default function MultiSelectDropdown({
+  selectedTags,
+  onTagsChange,
+  placeholder = "选择标签..."
 }: MultiSelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')

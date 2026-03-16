@@ -27,27 +27,31 @@ export const OPTION_MODES = {
 
 export type OptionMode = typeof OPTION_MODES[keyof typeof OPTION_MODES]
 
+export const TABLE_MODES = {
+  DICT: 'dict' as const,
+  STROKE: 'stroke' as const
+} as const
+
+export type TableMode = typeof TABLE_MODES[keyof typeof TABLE_MODES]
 
 export const UI_TEXTS = {
   [LEARNING_MODES.SIMPLIFIED]: {
-    title: '简体字认读',
-    button: '显示简体字',
-    description: '显示简体字，识别对应繁体字'
+    title: '简化字认读',
+    button: '简化字模式',
   },
   [LEARNING_MODES.TRADITIONAL]: {
     title: '繁（异）体字认读',
-    button: '显示繁（异）体字',
-    description: '显示繁体字，识别对应简体字'
+    button: '繁（异）体字模式',
   }
 } as const
 
 export const DISPLAY_MODE_TEXTS = {
+  [DISPLAY_MODES.SEQUENTIAL]: {
+    title: '顺序模式',
+  },
   [DISPLAY_MODES.RANDOM]: {
     title: '随机模式',
   },
-  [DISPLAY_MODES.SEQUENTIAL]: {
-    title: '顺序模式',
-  }
 } as const
 
 // 列表页面常量定义
@@ -56,7 +60,7 @@ export const UI_LABELS = {
   FILTER_TAGS: '按标签',
   SEARCH_PLACEHOLDER: '搜索汉字、拼音...',
   TAGS_PLACEHOLDER: '选择标签...',
-  RESULTS_TEXT: '共找到 {count} 个汉字，当前显示第 {page} 页',
+  // RESULTS_TEXT: '共找到 {count} 个汉字，当前显示第 {page} 页',
   CLEAR_ALL: '全部',
   ITEMS_PER_PAGE: [
     { value: 10, label: '10条/页' },

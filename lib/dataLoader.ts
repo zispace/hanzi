@@ -1,5 +1,5 @@
 import { HanziItem } from '@/lib/types'
-import nextConfig from '@/next.config'; 
+import nextConfig from '@/next.config';
 
 let globalDataCache: HanziItem[] | null = null
 

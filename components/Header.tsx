@@ -1,7 +1,7 @@
 'use client'
 
 import { BookOpen } from 'lucide-react'
-import nextConfig from '@/next.config'; 
+import nextConfig from '@/next.config';
 
 interface HeaderProps {
   currentPage: 'home' | 'list' | 'learn'

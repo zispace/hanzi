@@ -6,9 +6,13 @@ import { LEARNING_MODES, LearningMode } from '@/lib/constants'
  * 获取候选数据：简化字模式时，候选为 hanzi.trad || hanzi.yiti
  * 繁体字模式时，候选为 hanzi.simp
  */
-export const getCandidateData = (data: HanziItem[], mode: LearningMode): HanziItem[] => {
+export const getCandidateData = (data: HanziItem[], mode: LearningMode, includeYiti: boolean = false): HanziItem[] => {
   return data.filter(item => {
-    return mode === LEARNING_MODES.SIMPLIFIED ? item.trad || item.yiti : item.simp;
+    if (mode === LEARNING_MODES.SIMPLIFIED) { // 简化字模式：有对应繁体或异体字
+      return includeYiti ? item.trad || item.yiti : item.trad;
+    } else { // 繁体字模式
+      return item.simp && (includeYiti || !item.trad);
+    }
   })
 }
 
@@ -60,14 +64,14 @@ export const extractUniqueGroups = (data: HanziItem[]): string[] => {
 /**
  * 生成随机汉字数组
  */
-export const generateRandomHanzi = (data: HanziItem[], count: number = 9): HanziItem[] => {
+export const generateRandomHanzi = (data: HanziItem[], count: number): HanziItem[] => {
   return [...data].sort(() => 0.5 - Math.random()).slice(0, count)
 }
 
 /**
  * 生成顺序汉字数组
  */
-export const generateSequentialHanzi = (data: HanziItem[], startIndex: number = 0, count: number = 9): HanziItem[] => {
+export const generateSequentialHanzi = (data: HanziItem[], startIndex: number = 0, count: number): HanziItem[] => {
   const actualStart = startIndex % data.length
   const result: HanziItem[] = []
 
@@ -75,6 +79,5 @@ export const generateSequentialHanzi = (data: HanziItem[], startIndex: number = 
     const index = (actualStart + i) % data.length
     result.push(data[index])
   }
-
   return result
 }

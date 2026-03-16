@@ -17,15 +17,16 @@ export default function LearnPage() {
   const [currentHanzi, setCurrentHanzi] = useState<HanziItem[]>([])
   const [showAnswer, setShowAnswer] = useState(false)
   const [learningMode, setLearningMode] = useState<LearningMode>(LEARNING_MODES.SIMPLIFIED)
-  const [displayMode, setDisplayMode] = useState<DisplayMode>(DISPLAY_MODES.RANDOM)
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(DISPLAY_MODES.SEQUENTIAL)
   const [selectedGroup, setSelectedGroup] = useState<string>(groupAll)
   const [sequentialIndex, setSequentialIndex] = useState(0)
+  const [includeYiti, setIncludeYiti] = useState(false)
 
   useEffect(() => {
     loadHanziData().then(rawData => {
       const data = rawData.filter(item => item.trad || item.simp || item.yiti)
       setHanziData(data)
-      startNewRound(data)
+      startNewRound(data, true)
     })
       .catch(error => {
         console.error('Error loading data:', error)
@@ -44,25 +45,8 @@ export default function LearnPage() {
   }, [hanziData, selectedGroup])
 
   const candidateData = useMemo(() => {
-    return getCandidateData(filteredData, learningMode)
-  }, [filteredData, learningMode])
-
-  const handlePrevious = () => {
-    if (candidateData.length === 0) return
-    const newIndex = Math.max(0, sequentialIndex - gridCount)
-    setSequentialIndex(newIndex)
-    const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
-    setCurrentHanzi(newHanzi)
-  }
-
-  const handleNext = () => {
-    if (candidateData.length === 0) return
-    const newIndex = sequentialIndex + gridCount
-    if (newIndex >= candidateData.length) return
-    setSequentialIndex(newIndex)
-    const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
-    setCurrentHanzi(newHanzi)
-  }
+    return getCandidateData(filteredData, learningMode, includeYiti)
+  }, [filteredData, learningMode, displayMode, includeYiti])
 
   // 键盘快捷键翻页
   useEffect(() => {
@@ -77,27 +61,64 @@ export default function LearnPage() {
         }
       }
     }
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [displayMode, sequentialIndex, candidateData])
+  }, [displayMode, sequentialIndex, candidateData, includeYiti])
+
+  // 当候选数据变化时，自动重新生成当前汉字
+  useEffect(() => {
+    if (candidateData.length === 0) {
+      setCurrentHanzi([])
+    } else {
+      const newHanzi = displayMode === DISPLAY_MODES.RANDOM
+        ? generateRandomHanzi(candidateData, gridCount)
+        : generateSequentialHanzi(candidateData, sequentialIndex, gridCount)
+      setCurrentHanzi(newHanzi)
+    }
+  }, [candidateData, sequentialIndex, displayMode])
+
+  const handlePrevious = () => {
+    if (candidateData.length === 0) {
+      setCurrentHanzi([])
+      return
+    }
+    const newIndex = Math.max(0, sequentialIndex - gridCount)
+    setSequentialIndex(newIndex)
+    const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
+    setCurrentHanzi(newHanzi)
+  }
+
+  const handleNext = () => {
+    if (candidateData.length === 0) {
+      setCurrentHanzi([])
+      return
+    }
+    const newIndex = sequentialIndex + gridCount
+    if (newIndex >= candidateData.length) return
+    setSequentialIndex(newIndex)
+    const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
+    setCurrentHanzi(newHanzi)
+  }
 
   const startNewRound = (data: HanziItem[], reset: boolean = false, numOfChars: number = gridCount) => {
-    const candidates = getCandidateData(data, learningMode)
-    if (candidates.length === 0) return
+    const candidates = getCandidateData(data, learningMode, includeYiti)
+    if (candidateData.length === 0) {
+      setCurrentHanzi([])
+      return
+    }
+    let currentIndex = sequentialIndex
+    if (reset) {
+      currentIndex = 0
+      setSequentialIndex(0)
+    }
 
     let newHanzi: HanziItem[] = []
     if (displayMode === DISPLAY_MODES.RANDOM) {
       newHanzi = generateRandomHanzi(candidates, numOfChars)
     } else {
-      newHanzi = generateSequentialHanzi(candidates, sequentialIndex, numOfChars)
-      if (!reset) {
-        setSequentialIndex(prev => (prev + numOfChars) % candidates.length)
-      }
+      newHanzi = generateSequentialHanzi(candidates, currentIndex, numOfChars)
     }
-
     setCurrentHanzi(newHanzi)
-    setShowAnswer(false)
   }
 
   if (!hanziData.length) {
@@ -113,83 +134,52 @@ export default function LearnPage() {
         <div className="shadow-soft p-6 mb-8">
           {/* 学习模式选择 */}
           <div className="card p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">学习模式</h2>
+            <h3 className="text-lg font-semibold mb-4">学习模式</h3>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="simplified-mode"
-                  name="learning-mode"
-                  checked={learningMode === LEARNING_MODES.SIMPLIFIED}
-                  onChange={() => {
-                    setLearningMode(LEARNING_MODES.SIMPLIFIED)
-                    setSequentialIndex(0)
-                    startNewRound(filteredData)
-                  }}
-                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
-                />
-                <label htmlFor="simplified-mode" className="text-sm font-medium">
-                  {UI_TEXTS[LEARNING_MODES.SIMPLIFIED].button}
-                </label>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="traditional-mode"
-                  name="learning-mode"
-                  checked={learningMode === LEARNING_MODES.TRADITIONAL}
-                  onChange={() => {
-                    setLearningMode(LEARNING_MODES.TRADITIONAL)
-                    setSequentialIndex(0)
-                    startNewRound(filteredData)
-                  }}
-                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
-                />
-                <label htmlFor="traditional-mode" className="text-sm font-medium">
-                  {UI_TEXTS[LEARNING_MODES.TRADITIONAL].button}
-                </label>
-              </div>
+              {Object.entries(LEARNING_MODES).map(([modeKey, modeValue]) => (
+                <div key={modeValue} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    id={`${modeKey.toLowerCase()}-mode`}
+                    name="learning-mode"
+                    checked={learningMode === modeValue}
+                    onChange={() => {
+                      setLearningMode(modeValue)
+                      setSelectedGroup(groupAll)
+                      setSequentialIndex(0)
+                      const newFilteredData = hanziData // selectedGroup will be 'all'
+                      startNewRound(newFilteredData, true)
+                    }}
+                    className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
+                  />
+                  <label htmlFor={`${modeKey.toLowerCase()}-mode`} className="text-sm font-medium">
+                    {UI_TEXTS[modeValue].button}
+                  </label>
+                </div>
+              ))}
             </div>
 
             {/* 显示模式选择 */}
             <h3 className="text-md font-semibold mb-3">显示模式</h3>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="random-mode"
-                  name="display-mode"
-                  checked={displayMode === DISPLAY_MODES.RANDOM}
-                  onChange={() => {
-                    setDisplayMode(DISPLAY_MODES.RANDOM)
-                    setSequentialIndex(0)
-                    startNewRound(filteredData)
-                  }}
-                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
-                />
-                <label htmlFor="random-mode" className="text-sm font-medium">
-                  {DISPLAY_MODE_TEXTS[DISPLAY_MODES.RANDOM].title}
-                </label>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="sequential-mode"
-                  name="display-mode"
-                  checked={displayMode === DISPLAY_MODES.SEQUENTIAL}
-                  onChange={() => {
-                    setDisplayMode(DISPLAY_MODES.SEQUENTIAL)
-                    setSequentialIndex(0)
-                    startNewRound(filteredData)
-                  }}
-                  className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
-                />
-                <label htmlFor="sequential-mode" className="text-sm font-medium">
-                  {DISPLAY_MODE_TEXTS[DISPLAY_MODES.SEQUENTIAL].title}
-                </label>
-              </div>
+              {Object.entries(DISPLAY_MODE_TEXTS).map(([mode, text]) => (
+                <div key={mode} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    id={`${mode}-mode`}
+                    name="display-mode"
+                    checked={displayMode === mode}
+                    onChange={() => {
+                      setDisplayMode(mode as DisplayMode)
+                      startNewRound(filteredData, true)
+                    }}
+                    className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
+                  />
+                  <label htmlFor={`${mode}-mode`} className="text-sm font-medium">
+                    {text.title}
+                  </label>
+                </div>
+              ))}
             </div>
 
             {/* 分组选择器 */}
@@ -200,9 +190,8 @@ export default function LearnPage() {
                 onChange={(e) => {
                   const newGroup = e.target.value
                   setSelectedGroup(newGroup)
-                  setSequentialIndex(0)
                   const newFilteredData = newGroup === groupAll ? hanziData : hanziData.filter(item => item.group === newGroup)
-                  startNewRound(newFilteredData)
+                  startNewRound(newFilteredData, true)
                 }}
                 className="px-4 py-2 input border rounded-lg focus-accent"
               >
@@ -212,15 +201,33 @@ export default function LearnPage() {
                   </option>
                 ))}
               </select>
+
               <span className="text-sm text-muted">
                 (共 {candidateData.length} 字)
               </span>
+
+              {/* 包含异体字选项 */}
+              <input
+                type="checkbox"
+                id="include-yiti"
+                checked={includeYiti}
+                onChange={(e) => {
+                  setIncludeYiti(e.target.checked)
+                  // startNewRound(filteredData, true)
+                }}
+                className="w-4 h-4 text-accent-primary rounded focus:ring-accent-primary"
+              />
+              <label htmlFor="include-yiti" className="text-sm font-medium">
+                包含异体字
+              </label>
             </div>
 
             {/* 操作按钮 */}
             <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={() => startNewRound(filteredData, true)}
+                onClick={() => {
+                  startNewRound(filteredData, true)
+                }}
                 className="flex items-center gap-2 px-4 py-2 button-primary hover:scale-105 transition-all duration-300 transform"
               >
                 {displayMode === DISPLAY_MODES.RANDOM ? <><Shuffle className="h-4 w-4" />换一批</> : <><RotateCcw className="h-4 w-4" />重新开始</>}

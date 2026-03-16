@@ -66,7 +66,6 @@ export default function Home() {
     }
   }
 
-
   if (!hanziData.length) {
     return <LoadingSpinner />
   }
@@ -156,7 +155,7 @@ export default function Home() {
               <HanziGrid
                 data={selectedHanzi}
                 columns={4}
-                onCardClick={(hanzi) => {
+                onCardDelete={(hanzi) => {
                   setSelectedHanzi(prev => prev.filter(h => h.char !== hanzi.char))
                 }}
               />

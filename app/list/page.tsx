@@ -6,13 +6,12 @@ import HanziTable from '@/components/HanziTable'
 import Header from '@/components/Header'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown'
-import { LIST_MODES, ListMode, OPTION_MODES, OptionMode, PAGINATION, UI_LABELS } from '@/lib/constants'
+import { LIST_MODES, ListMode, OPTION_MODES, OptionMode, PAGINATION, TABLE_MODES, TableMode, UI_LABELS } from '@/lib/constants'
 import { loadHanziData } from '@/lib/dataLoader'
 import { HanziItem, tagMapping } from '@/lib/types'
-import { ChevronLeft, ChevronsLeft, ChevronRight, ChevronsRight, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { calculatePaginatedData, extractUniqueGroups, generatePageNumbers, groupFilter, searchFilter, tagsFilter } from './utils'
-
 
 export default function ListPage() {
   const [hanziData, setHanziData] = useState<HanziItem[]>([])
@@ -23,6 +22,7 @@ export default function ListPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
+  const [tableDisplayMode, setTableDisplayMode] = useState<TableMode>(TABLE_MODES.STROKE)
 
   useEffect(() => {
     loadHanziData().then(data => {
@@ -65,6 +65,25 @@ export default function ListPage() {
   }, [filteredData, currentPage, itemsPerPage])
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+
+  // 键盘快捷键翻页
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (displayMode === LIST_MODES.TABLE) {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault()
+          handlePageChange(currentPage - 1)
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault()
+          handlePageChange(currentPage + 1)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [displayMode, filterOptions, filteredData, paginatedData, totalPages])
+
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -158,10 +177,22 @@ export default function ListPage() {
 
           {/* 显示模式切换 */}
           <div className="flex items-center justify-between">
-            <p className="">
-              {UI_LABELS.RESULTS_TEXT.replace('{count}', filteredData.length.toString()).replace('{page}', currentPage.toString())}
+            <p className="text-sm">
+              共找到 {filteredData.length} 个汉字，当前显示第 {currentPage} / {totalPages} 页
             </p>
-            <DisplayModeToggle displayMode={displayMode} onModeChange={(mode) => setDisplayMode(mode as ListMode)} />
+            <div className="flex items-center gap-4">
+              {displayMode === LIST_MODES.TABLE && (
+                <select
+                  value={tableDisplayMode}
+                  onChange={(e) => setTableDisplayMode(e.target.value as TableMode)}
+                  className="px-3 py-2 input border rounded-lg focus-accent text-sm"
+                >
+                  <option value={TABLE_MODES.DICT}>释义</option>
+                  <option value={TABLE_MODES.STROKE}>笔顺</option>
+                </select>
+              )}
+              <DisplayModeToggle displayMode={displayMode} onModeChange={(mode) => setDisplayMode(mode as ListMode)} />
+            </div>
           </div>
         </div>
 
@@ -184,7 +215,8 @@ export default function ListPage() {
             showStrokeCount={false}
             showRadical={true}
             showActions={false}
-            showStrokeSequence={true}
+            showStrokeSequence={tableDisplayMode === TABLE_MODES.STROKE}
+            showDict={tableDisplayMode === TABLE_MODES.DICT}
           />
         )}
 

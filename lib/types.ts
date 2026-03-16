@@ -51,7 +51,6 @@ export const tagMapping: Record<string, string> = {
   "i3": "地名用字",
 }
 
-
 export const tagShortMapping: Record<string, string> = {
   "a1": "一级字",
   "a2": "二级字",

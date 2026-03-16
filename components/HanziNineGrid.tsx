@@ -12,11 +12,14 @@ interface HanziNineGridProps {
 }
 
 export default function HanziNineGrid({ data, showMode, showAnswer, onSpeak }: HanziNineGridProps) {
+  const validData = data.filter(hanzi => hanzi && hanzi.char);
+  if (validData.length === 0) {
+    return <div className="grid grid-cols-3 gap-2"></div>;
+  }
+
   return (
     <div className="grid grid-cols-3 gap-2">
-      {data.map((hanzi, index) => {
-        const displayChars = getDisplayCharacter(hanzi, showMode);
-
+      {validData.map((hanzi, index) => {
         return (
           <div key={`${hanzi.char}-${index}`} className="relative group">
             <div className="bg-gradient-to-br to-secondary border-2 rounded-xl p-8 flex items-center justify-center card">

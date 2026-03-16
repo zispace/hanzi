@@ -15,6 +15,7 @@ interface HanziGridProps {
   showPinyin?: boolean
   showBothForms?: boolean
   onCardClick?: (hanzi: HanziItem) => void
+  onCardDelete?: (hanzi: HanziItem) => void
 }
 
 export default function HanziGrid({
@@ -28,7 +29,8 @@ export default function HanziGrid({
   showGroup = true,
   showPinyin = true,
   showBothForms = true,
-  onCardClick
+  onCardClick,
+  onCardDelete
 }: HanziGridProps) {
   const gridColsClass = {
     1: 'grid-cols-1',
@@ -54,6 +56,7 @@ export default function HanziGrid({
           showPinyin={showPinyin}
           showBothForms={showBothForms}
           onClick={() => onCardClick?.(hanzi)}
+          onDelete={() => onCardDelete?.(hanzi)}
         />
       ))}
     </div>

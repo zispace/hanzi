@@ -103,12 +103,12 @@ export default function HanziTable({
                   </td>
                 )}
                 {showStrokeSequence && (
-                  <td className="px-6 py-4 flex items-center justify-center min-h-[60px]">
+                  <td className="px-4 py-3 flex items-center justify-center min-h-[60px] max-w-[400px]">
                     {hanzi.ordinal ? (
                       <img
                         src={`${STROKE_REPO}/${hanzi.ordinal.toString().padStart(4, '0')}.svg`}
                         alt={safeValue(hanzi.char)}
-                        className="stroke"
+                        className="img-stroke"
                         loading='lazy'
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
@@ -121,12 +121,12 @@ export default function HanziTable({
                   </td>
                 )}
                 {showDict && (
-                  <td className="px-6 py-4 flex items-center justify-center">
+                  <td className="px-4 py-3 flex items-center justify-center min-h-[60px] max-w-[400px]">
                     {hanzi.ordinal ? (
                       <img
                         src={`${DICT_REPO}/${hanzi.ordinal.toString().padStart(4, '0')}.png`}
                         alt={safeValue(hanzi.char)}
-                        className="meaning"
+                        className="img-meaning"
                         loading='lazy'
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';

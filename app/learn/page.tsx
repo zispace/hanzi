@@ -86,6 +86,7 @@ export default function LearnPage() {
     setSequentialIndex(newIndex)
     const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
     setCurrentHanzi(newHanzi)
+    setShowAnswer(false)
   }
 
   const handleNext = () => {
@@ -98,6 +99,7 @@ export default function LearnPage() {
     setSequentialIndex(newIndex)
     const newHanzi = generateSequentialHanzi(candidateData, newIndex, gridCount)
     setCurrentHanzi(newHanzi)
+    setShowAnswer(false)
   }
 
   const startNewRound = (data: HanziItem[], reset: boolean = false, numOfChars: number = gridCount) => {
@@ -119,6 +121,7 @@ export default function LearnPage() {
       newHanzi = generateSequentialHanzi(candidates, currentIndex, numOfChars)
     }
     setCurrentHanzi(newHanzi)
+    setShowAnswer(false)
   }
 
   if (!hanziData.length) {

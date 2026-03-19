@@ -155,6 +155,7 @@ export default function Home() {
               <HanziGrid
                 data={selectedHanzi}
                 columns={4}
+                showDelete={true}
                 onCardDelete={(hanzi) => {
                   setSelectedHanzi(prev => prev.filter(h => h.char !== hanzi.char))
                 }}

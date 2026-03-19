@@ -13,6 +13,7 @@ interface HanziCardProps {
   showPinyin?: boolean
   showBothForms?: boolean
   compact?: boolean
+  showDelete?: boolean
   onClick?: () => void
   onDelete?: () => void
 }
@@ -27,6 +28,7 @@ export default function HanziCard({
   showPinyin = true,
   showBothForms = true,
   compact = false,
+  showDelete = false,
   onClick,
   onDelete
 }: HanziCardProps) {
@@ -39,7 +41,7 @@ export default function HanziCard({
 
   return (
     <div className={cardClass}>
-      {onDelete && (
+      {showDelete && onDelete && (
         <button
           onClick={(e) => {
             e.stopPropagation()

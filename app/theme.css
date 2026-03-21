@@ -1,6 +1,8 @@
 /* CSS Variables for Humanistic Chinese Theme */
 /* Simple, elegant, and maintainable design system */
 
+@import url("https://fontsapi.zeoseven.com/582/main/result.css");
+
 @font-face {
   font-family: 'TsangerJinKai';
   src: url('/hanzi/fonts/仓耳今楷05-W03.woff2') format('woff2');
@@ -27,9 +29,10 @@
   --faded-color: #DFD6C480;
 
   --font-sans: "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", system-ui, -apple-system, sans-serif;
+    "PingFang SC", "SimHei", "STHeiti", "Noto Sans SC", "Microsoft YaHei", 
+    system-ui, -apple-system, sans-serif;
   /* --font-serif: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", "SimSun", serif; */
-  --font-kai: 'KaiTi', 'STKaiti', 'TsangerJinKai', serif;
+  --font-kai: "KaiTi", "STKaiti", "Kai", "gkai00mp", "TsangerJinKai", serif;
 }
 
 @media (prefers-color-scheme: dark) {
